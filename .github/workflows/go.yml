@@ -39,5 +39,5 @@ jobs:
           echo "Deploying to Production Service"
           scp -B -r -o "StrictHostKeyChecking no" -i ./id_rsa $temp ${{ secrets.ciUser }}@core.geekprojex.com:/home/${{ secrets.ciUser }}/deploymentStaging/
           echo "Artifacts Uploaded to Production Server"
-          ssh -t -i ./id_rsa ${{ secrets.ciUser }}@core.geekprojex.com sudo ./deployGeekProfits.sh $temp
+          ssh -t -i ./id_rsa ${{ secrets.ciUser }}@core.geekprojex.com sudo ./deployBitProphet-Go.sh $temp
           echo "Deployment Initiated at Production Serve r"
