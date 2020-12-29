@@ -36,7 +36,7 @@ jobs:
           chmod 600 ./id_rsa
           cp -R ./web $temp
           cp ./BitProphet-Go $temp
-          echo "Deploying to Production Service"
+          echo "Deploying to Production Server"
           scp -B -r -o "StrictHostKeyChecking no" -i ./id_rsa $temp ${{ secrets.ciUser }}@core.geekprojex.com:/home/${{ secrets.ciUser }}/deploymentStaging/
           echo "Artifacts Uploaded to Production Server"
           ssh -t -i ./id_rsa ${{ secrets.ciUser }}@core.geekprojex.com sudo ./deployBitProphet-Go.sh $temp
