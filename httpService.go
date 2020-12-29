@@ -83,7 +83,7 @@ func WWWHome(w http.ResponseWriter, r *http.Request) {
 	}
 	data.WsHost = r.Host
 	logger.Printf("[%s] %s %s", r.RequestURI, r.Method, r.RemoteAddr)
-	tmpl := template.Must(template.ParseFiles(Config.Web.Path+"/Home.tmpl", Config.Web.Path+"/Base.tmpl"))
+	tmpl := template.Must(template.ParseFiles(Config.Web.Path+"/home.tmpl", Config.Web.Path+"/base.tmpl"))
 	err := tmpl.Execute(w, &data)
 	if err != nil {
 		logger.Printf("Error Parsing Template: %s", err)
