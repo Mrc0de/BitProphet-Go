@@ -142,23 +142,26 @@
         });
         sock.addEventListener('message', function (event) {
             // dbg('Message from server ' + event.data.trim());
-            let obj = JSON.parse(event.data);
-            console.log(obj);
-            // Tickers...
-            if ( obj.type === "ticker" && obj.product_id === "BTC-USD" ) {
-                $("#BTCTicker_Price").html(obj.price);
-                $("#BTCTicker_BestAsk").html(obj.best_ask);
-                $("#BTCTicker_BestBid").html(obj.best_bid);
-            } else if ( obj.type === "ticker" && obj.product_id === "ETH-USD" ) {
-                $("#ETHTicker_Price").html(obj.price);
-                $("#ETHTicker_BestAsk").html(obj.best_ask);
-                $("#ETHTicker_BestBid").html(obj.best_bid);
-            } else if ( obj.type === "ticker" && obj.product_id === "LTC-USD" ) {
-                $("#LTCTicker_Price").html(obj.price);
-                $("#LTCTicker_BestAsk").html(obj.best_ask);
-                $("#LTCTicker_BestBid").html(obj.best_bid);
+            try {
+                let obj = JSON.parse(event.data);
+                // Tickers...
+                if (obj.type === "ticker" && obj.product_id === "BTC-USD") {
+                    $("#BTCTicker_Price").html(obj.price);
+                    $("#BTCTicker_BestAsk").html(obj.best_ask);
+                    $("#BTCTicker_BestBid").html(obj.best_bid);
+                } else if (obj.type === "ticker" && obj.product_id === "ETH-USD") {
+                    $("#ETHTicker_Price").html(obj.price);
+                    $("#ETHTicker_BestAsk").html(obj.best_ask);
+                    $("#ETHTicker_BestBid").html(obj.best_bid);
+                } else if (obj.type === "ticker" && obj.product_id === "LTC-USD") {
+                    $("#LTCTicker_Price").html(obj.price);
+                    $("#LTCTicker_BestAsk").html(obj.best_ask);
+                    $("#LTCTicker_BestBid").html(obj.best_bid);
+                }
+            } catch (error) {
+                console.log(error);
             }
-            $('#debugOut').scrollTop($('#debugOut')[0].scrollHeight);
+            // $('#debugOut').scrollTop($('#debugOut')[0].scrollHeight);
         });
         // sock.addEventListener('ping', function (event) {
         //     dbg('Ping from server: ' + event.data);
