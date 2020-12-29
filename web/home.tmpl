@@ -5,43 +5,29 @@
             background-image: radial-gradient(
                     rgba(0, 150, 0, 0.75), black 120%
             );
-            height: 100vh;
-            width: 100vw;
             padding: 0;
             display: flex;
             color: white;
             font: 1rem Inconsolata, monospace;
             /*text-shadow: 0 0 5px #C8C8C8;*/
-        }
-
-        body::after, #BitProphet-GoHomePage::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: repeating-linear-gradient(
-                    0deg,
-                    rgba(0, 0, 0, 0.15),
-                    rgba(0, 0, 0, 0.15) 1px,
-                    transparent 1px,
-                    transparent 2px
-            );
+            height:100vh;
         }
 
         #BitProphet-GoHomePage {
-            width: 95vw;
-            height: 90vh;
             background: transparent;
             color: white;
-            margin: 0 auto;
-            margin-top: 2em;
             border: 1px solid #000000;
             border-radius: 2px;
             box-shadow: inset 2px 2px 2px rgba(255, 255, 255, .4), inset -2px -2px 2px rgba(0, 0, 0, .4);
             padding-left: 1em;
             padding-right: 1em;
+            background: repeating-linear-gradient(
+                    33deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+            );
         }
 
         #bpTitleBar {
@@ -60,24 +46,55 @@
 
 {{template "header" .}}
 
-<div id="BitProphet-GoHomePage" class="mx-auto">
-    <div id="bpTitleBar">
-        BitProphet-Go
+<div class="col-12">
+    <div class="row p-0 m-0 col-12">
+        <div id="BTCTickerBox" class="mr-1 col" style="border: black thin solid; color:white; background-color: black;">
+            BTC-USD</br>
+            Price <span id="BTCTicker_Price" class="badge badge-light"></span>
+            Ask <span id="BTCTicker_BestAsk" class="badge badge-light"></span>
+            Bid <span id="BTCTicker_BestBid" class="badge badge-light"></span>
+        </div>
+        <div id="ETHTickerBox" class="mr-1 col" style="border: black thin solid; color:white; background-color: black;">
+            ETH-USD</br>
+            Price <span id="ETHTicker_Price" class="badge badge-light"></span>
+            Ask <span id="ETHTicker_BestAsk" class="badge badge-light"></span>
+            Bid <span id="ETHTicker_BestBid" class="badge badge-light"></span>
+        </div>
+        <div id="LTCTickerBox" class="mr-1 col" style="border: black thin solid; color:white; background-color: black;">
+            LTC-USD</br>
+            Price <span id="LTCTicker_Price" class="badge badge-light"></span>
+            Ask <span id="LTCTicker_BestAsk" class="badge badge-light"></span>
+            Bid <span id="LTCTicker_BestBid" class="badge badge-light"></span>
+        </div>
     </div>
-    <textarea id="debugOut" class="col-md"></textarea>
+
+    <div class="row p-0 m-0 col-12">
+        <div id="BitProphet-GoHomePage" class="col-12">
+            <div id="bpTitleBar" class="col">
+                BitProphet-Go
+            </div>
+            <textarea id="debugOut" class="col-12" readonly aria-readonly="true"></textarea>
+        </div>
+    </div>
 </div>
 
 
+
 <script>
-
+    {{/* Connect to Me! */}}
     let ws = new WebSocket('wss://' + {{.WsHost}} +"/ws");
-
+    // also Coinbase.... Public
+    let coinbasePublicWSS = new WebSocket('wss://ws-feed.pro.coinbase.com');
+    //
     function dbg(msg) {
         $("#debugOut").text($("#debugOut").text().trim() + "\r\n" + msg);
     }
 
     dbg("[Debug Stream] Connecting...");
     wsSetup(ws);
+    wsCBPublicSetup(coinbasePublicWSS);
+
+
 
     /////////////////////////
     function wsSetup(sock) {
@@ -107,5 +124,60 @@
         })
     }
 
+    function wsCBPublicSetup(sock) {
+        // Websocket Setup
+        sock.addEventListener('open', function (event) {
+            dbg("Connected To Coinbase Pro WS Feed [Live]");
+            // subscribe our three primary tickers
+            sock.send(JSON.stringify({
+                "type": "subscribe",
+                "product_ids": [ "BTC-USD","ETH-USD","LTC-USD"],
+                "channels": [
+                    {
+                        "name": "ticker",
+                        "product_ids": [ "BTC-USD","ETH-USD","LTC-USD" ]
+                    }
+                ]
+            }));
+        });
+        sock.addEventListener('message', function (event) {
+            // dbg('Message from server ' + event.data.trim());
+            let obj = JSON.parse(event.data);
+            console.log(obj);
+            // Tickers...
+            if ( obj.type === "ticker" && obj.product_id === "BTC-USD" ) {
+                $("#BTCTicker_Price").html(obj.price);
+                $("#BTCTicker_BestAsk").html(obj.best_ask);
+                $("#BTCTicker_BestBid").html(obj.best_bid);
+            } else if ( obj.type === "ticker" && obj.product_id === "ETH-USD" ) {
+                $("#ETHTicker_Price").html(obj.price);
+                $("#ETHTicker_BestAsk").html(obj.best_ask);
+                $("#ETHTicker_BestBid").html(obj.best_bid);
+            } else if ( obj.type === "ticker" && obj.product_id === "LTC-USD" ) {
+                $("#LTCTicker_Price").html(obj.price);
+                $("#LTCTicker_BestAsk").html(obj.best_ask);
+                $("#LTCTicker_BestBid").html(obj.best_bid);
+            }
+            $('#debugOut').scrollTop($('#debugOut')[0].scrollHeight);
+        });
+        // sock.addEventListener('ping', function (event) {
+        //     dbg('Ping from server: ' + event.data);
+        //     $('#debugOut').scrollTop($('#debugOut')[0].scrollHeight);
+        // });
+        sock.addEventListener('close', function (event) {
+            dbg('Disconnected from server ' + event);
+            console.log(event);
+        });
+        sock.addEventListener('error', function (event) {
+            dbg('Error from server ' + event);
+            console.log(event);
+        });
+        // $("#wsCommInput").on("keypress", function (e) {
+        //     if (e.which === 13) {
+        //         sock.send($("#wsCommInput").val());
+        //         $("#wsCommInput").val("");
+        //     }
+        // })
+    }
 
 </script>
