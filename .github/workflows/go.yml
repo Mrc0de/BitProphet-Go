@@ -40,4 +40,4 @@ jobs:
           scp -B -r -o "StrictHostKeyChecking no" -i ./id_rsa $temp ${{ secrets.ciUser }}@core.geekprojex.com:/home/${{ secrets.ciUser }}/deploymentStaging/
           echo "Artifacts Uploaded to Production Server"
           ssh -t -i ./id_rsa ${{ secrets.ciUser }}@core.geekprojex.com sudo ./deployGeekProfits.sh $temp
-          echo "Deployment Initiated at Production Server"
+          echo "Deployment Initiated at Production Serve r"
