@@ -1,0 +1,111 @@
+{{define "pageStyle"}}
+    <style>
+        body {
+            background-color: black;
+            background-image: radial-gradient(
+                    rgba(0, 150, 0, 0.75), black 120%
+            );
+            height: 100vh;
+            width: 100vw;
+            padding: 0;
+            display: flex;
+            color: white;
+            font: 1rem Inconsolata, monospace;
+            /*text-shadow: 0 0 5px #C8C8C8;*/
+        }
+
+        body::after, #BitProphet-GoHomePage::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+            );
+        }
+
+        #BitProphet-GoHomePage {
+            width: 95vw;
+            height: 90vh;
+            background: transparent;
+            color: white;
+            margin: 0 auto;
+            margin-top: 2em;
+            border: 1px solid #000000;
+            border-radius: 2px;
+            box-shadow: inset 2px 2px 2px rgba(255, 255, 255, .4), inset -2px -2px 2px rgba(0, 0, 0, .4);
+            padding-left: 1em;
+            padding-right: 1em;
+        }
+
+        #bpTitleBar {
+
+        }
+
+        #debugOut {
+            padding: 0;
+            height: 20vh;
+            background-color: black;
+            color: greenyellow;
+            background-blend-mode: color-burn;
+        }
+    </style>
+{{end}}
+
+{{template "header" .}}
+
+<div id="BitProphet-GoHomePage" class="mx-auto">
+    <div id="bpTitleBar">
+        BitProphet-Go
+    </div>
+    <textarea id="debugOut" class="col-md"></textarea>
+</div>
+
+
+<script>
+
+    let ws = new WebSocket('wss://' + {{.WsHost}} +"/ws");
+
+    function dbg(msg) {
+        $("#debugOut").text($("#debugOut").text().trim() + "\r\n" + msg);
+    }
+
+    dbg("[Debug Stream] Connecting...");
+    wsSetup(ws);
+
+    /////////////////////////
+    function wsSetup(sock) {
+        // Websocket Setup
+        sock.addEventListener('open', function (event) {
+            dbg("Connected!");
+        });
+        sock.addEventListener('message', function (event) {
+            dbg('Message from server ' + event.data.trim());
+            $('#debugOut').scrollTop($('#debugOut')[0].scrollHeight);
+        });
+        sock.addEventListener('ping', function (event) {
+            dbg('Ping from server: ' + event.data);
+            $('#debugOut').scrollTop($('#debugOut')[0].scrollHeight);
+        });
+        sock.addEventListener('close', function (event) {
+            dbg('Disconnected from server ' + event);
+        });
+        sock.addEventListener('error', function (event) {
+            dbg('Error from server ' + event);
+        });
+        $("#wsCommInput").on("keypress", function (e) {
+            if (e.which === 13) {
+                sock.send($("#wsCommInput").val());
+                $("#wsCommInput").val("");
+            }
+        })
+    }
+
+
+</script>
