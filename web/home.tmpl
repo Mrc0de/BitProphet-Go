@@ -111,6 +111,11 @@
             animation: Highcharts.svg, // don't animate in old IE
             marginRight: 0,
         },
+        plotOptions: {
+            series: {
+                color: '#FF0000'
+            }
+        },
         time: {
             useUTC: false
         },
@@ -129,7 +134,7 @@
                 text: '$'
             },
             plotLines: [{
-                value: 1,
+                value: 0,
                 width: 1,
                 color: '#888'
             }]
@@ -156,6 +161,11 @@
             height: 150,
             animation: Highcharts.svg, // don't animate in old IE
             marginRight: 0,
+        },
+        plotOptions: {
+            series: {
+                color: '#ff0000'
+            }
         },
         time: {
             useUTC: false
@@ -202,6 +212,11 @@
             height: 150,
             animation: Highcharts.svg, // don't animate in old IE
             marginRight: 0,
+        },
+        plotOptions: {
+            series: {
+                color: '#FF0000'
+            }
         },
         time: {
             useUTC: false
@@ -298,22 +313,22 @@
                     $("#BTCTicker_BestAsk").html(obj.best_ask);
                     $("#BTCTicker_BestBid").html(obj.best_bid);
                     let shifter = false;
-                    if (BTCChart.pointCount > 250) { shifter = true; }
-                    BTCChart.series[0].addPoint([(new Date()).getTime(),parseFloat(obj.price)], true, shifter);
+                    if (BTCChart.pointCount > 75) { shifter = true; }
+                    BTCChart.series[0].addPoint([(new Date()).getTime(),parseFloat(obj.price)], true, shifter,!shifter);
                 } else if (obj.type === "ticker" && obj.product_id === "ETH-USD") {
                     $("#ETHTicker_Price").html(obj.price);
                     $("#ETHTicker_BestAsk").html(obj.best_ask);
                     $("#ETHTicker_BestBid").html(obj.best_bid);
                     let shifter = false;
-                    if (ETHChart.pointCount > 250) { shifter = true; }
-                    ETHChart.series[0].addPoint([(new Date()).getTime(),parseFloat(obj.price)], true, shifter);
+                    if (ETHChart.pointCount > 75) { shifter = true; }
+                    ETHChart.series[0].addPoint([(new Date()).getTime(),parseFloat(obj.price)], true, shifter,!shifter);
                 } else if (obj.type === "ticker" && obj.product_id === "LTC-USD") {
                     $("#LTCTicker_Price").html(obj.price);
                     $("#LTCTicker_BestAsk").html(obj.best_ask);
                     $("#LTCTicker_BestBid").html(obj.best_bid);
                     let shifter = false;
-                    if (LTCChart.pointCount > 250) { shifter = true; }
-                    LTCChart.series[0].addPoint([(new Date()).getTime(),parseFloat(obj.price)], true, shifter);
+                    if (LTCChart.pointCount > 75) { shifter = true; }
+                    LTCChart.series[0].addPoint([(new Date()).getTime(),parseFloat(obj.price)], true, shifter,!shifter);
                 }
             } catch (error) {
                 console.log(error);
