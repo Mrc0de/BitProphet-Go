@@ -34,8 +34,8 @@ func (s *Configuration) load(confFile string) error {
 		return err
 	}
 	if Debug {
-		logger.Printf("Host: %s \tPath: %s \tCert: %s \tKey: %s", Config.Web.Host, Config.Web.Path,
-			Config.Web.CertFile, Config.Web.KeyFile)
+		logger.Printf("Host: %s \tPath: %s", Config.Web.Host, Config.Web.Path)
+		logger.Printf("Cert: %s \tKey: %s", Config.Web.CertFile, Config.Web.KeyFile)
 	}
 	return nil
 }
