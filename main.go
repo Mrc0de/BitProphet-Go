@@ -74,7 +74,7 @@ func main() {
 		select {
 		case bpReport := <-BitProphet.ReportingChannel:
 			{
-				logger.Printf("[bpReport] \t[%s]", bpReport.EventType)
+				logger.Printf("[bpReport] \t[%s] \t[%s]", bpReport.EventType, bpReport.EventData)
 			}
 		case d := <-DebugChannel:
 			{
