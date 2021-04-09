@@ -13,14 +13,14 @@ type Configuration struct {
 		CertFile string `yaml:"certfile"`
 		KeyFile  string `yaml:"keyfile"`
 	} `yaml:"web"`
-	InfluxDataBase struct {
+	InfluxDatabase struct {
 		Host string `yaml:"host"`
 		User string `yaml:"user"`
 		Pass string `yaml:"pass"`
 	} `yaml:"influxdatabase"`
 	BitProphetServiceClient struct {
-		DefaultSubList []string `yaml:"defaultsubscribelist"`
-		WSHost         string   `yaml:"wshost"`
+		DefaultSubList []string
+		WSHost         string `yaml:"wshost"`
 	} `yaml:"bitprophetserviceclient"`
 }
 
@@ -37,7 +37,7 @@ func (s *Configuration) load(confFile string) error {
 		logger.Printf("Host: %s \tPath: %s", s.Web.Host, s.Web.Path)
 		logger.Printf("Cert: %s \tKey: %s", s.Web.CertFile, s.Web.KeyFile)
 		logger.Printf("WSHost: %s", s.BitProphetServiceClient.WSHost)
-		logger.Printf("InfluxHost: %s", s.InfluxDataBase.Host)
+		logger.Printf("InfluxHost: %s", s.InfluxDatabase.Host)
 	}
 	return nil
 }
