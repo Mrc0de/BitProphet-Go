@@ -68,11 +68,7 @@ func main() {
 	// Start up Backend Service (BitProphetService)
 	BitProphet := CreateBPService()
 	go BitProphet.Run()
-	err = BitProphet.Client.ConnectCoinbase()
-	if err != nil {
-		logger.Printf("[ERROR] Cannot Connect Coinbase Client: \t %s", err)
-		os.Exit(1)
-	}
+	first := true
 
 	// Loop
 	for {
@@ -101,6 +97,14 @@ func main() {
 		if mainQuit {
 			logger.Println("[BitProphet-Go] Shutdown Finished.")
 			break
+		}
+		if first {
+			err = BitProphet.Client.ConnectCoinbase()
+			if err != nil {
+				logger.Printf("[ERROR] Cannot Connect Coinbase Client: \t %s", err)
+				os.Exit(1)
+			}
+			first = false
 		}
 	}
 
