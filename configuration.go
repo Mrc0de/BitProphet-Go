@@ -36,6 +36,7 @@ func (s *Configuration) load(confFile string) error {
 	if Debug {
 		logger.Printf("Host: %s \tPath: %s", Config.Web.Host, Config.Web.Path)
 		logger.Printf("Cert: %s \tKey: %s", Config.Web.CertFile, Config.Web.KeyFile)
+		logger.Printf("WSHOST: %s", Config.BitProphetServiceClient.WSHost)
 	}
 	return nil
 }
