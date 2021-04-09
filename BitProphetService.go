@@ -161,6 +161,10 @@ func (b *BitProphetClient) ConnectCoinbase() error {
 						break
 					}
 				}
+			default:
+				{
+					//
+				}
 			}
 		}
 	}()
