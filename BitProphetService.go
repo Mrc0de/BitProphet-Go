@@ -61,7 +61,7 @@ type BitProphetClient struct {
 func CreateBPService() *bpService {
 	var bps = bpService{
 		Client:           SpawnBitProphetClient(),
-		ReportingChannel: make(chan *bpServiceEvent, 0),
+		ReportingChannel: make(chan *bpServiceEvent, 100),
 		CommandChannel:   make(chan *bpServiceCommandMsg, 0),
 		CoinbaseChannel:  make(chan *bpCoinBaseMsg, 0),
 		Quit:             false,
