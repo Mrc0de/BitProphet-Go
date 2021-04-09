@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -16,8 +17,9 @@ import (
 // Web Client
 // Coinbase (Primary Integration)
 // Account Information Display
-// Automatic Trading (main feature)
-
+// Automatic Trading (main feature) (very basic buy/sell profit mechanism)
+// the price doesnt matter, the amplitude of change and the frequency of change does.
+// it skims the slopes (totally just made that up)
 var (
 	// Globals
 	Config     Configuration
@@ -47,7 +49,7 @@ func main() {
 	}
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Printf("[BitProphet-Go] [UNHANDLED_ERROR]: %s", r)
+			fmt.Printf("[BitProphet-Go] [UNHANDLED_ERROR]: %s", r)
 			os.Exit(1)
 		}
 	}()
@@ -63,10 +65,17 @@ func main() {
 	WebService.Init()
 	signal.Notify(quitKey, os.Interrupt)
 	mainQuit := false
+	// Start up Backend Service (BitProphetService)
+	BitProphet := CreateBPService()
+	go BitProphet.Run()
 
 	// Loop
 	for {
 		select {
+		case bpReport := <-BitProphet.ReportingChannel:
+			{
+				logger.Printf("[bpReport] \t[%s]", bpReport.EventType)
+			}
 		case d := <-DebugChannel:
 			{
 				if Debug {

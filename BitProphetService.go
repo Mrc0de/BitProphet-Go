@@ -1,0 +1,103 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+// This is not part of the web side
+// but it informs the web side in some cases
+// tracks markets via influxdb
+// performs auto trades according to selected strategies
+
+// This 'Service' runs the 'client' for the 'user', so they dont have to
+// The web interface and accounts system MUST require both authentication to this service, authorization of automated use
+// AND some form of auth to coinbase on the users behalf, OAUTH is a good candidate as they can revoke access easily, if desired
+// make sure to detect that happening so we can stop (and notify the user)
+type bpService struct {
+	Client           *BitProphetClient
+	ReportingChannel chan *bpServiceEvent
+	CommandChannel   chan *bpServiceCommandMsg
+	CoinbaseChannel  chan *bpCoinBaseMsg
+	Quit             bool
+}
+
+type bpServiceEvent struct {
+	Time      time.Time
+	EventType string
+	EventData string
+}
+
+type bpServiceCommandMsg struct {
+	Time      time.Time
+	Command   string
+	Arguments []string
+}
+
+type bpCoinBaseMsg struct {
+	Time    time.Time
+	MsgType string
+	MsgBody []byte
+}
+
+type BitProphetClient struct {
+	// wsClient that connects to coinbase
+	// Native Authentication for host user (optional) (server side config file or envvar)
+	// Public Authentication (OAUTH) for other users
+	ServiceRoster []string // need user object, roster of users using BPService
+	OutMsgQueue   []string // need msg object, queue outgoing WS requests to prevent flooding coinbase, establish acceptable msg per second
+}
+
+func CreateBPService() *bpService {
+	var bps = bpService{
+		Client:           SpawnBitProphetClient(),
+		ReportingChannel: make(chan *bpServiceEvent, 0),
+		CommandChannel:   make(chan *bpServiceCommandMsg, 0),
+		CoinbaseChannel:  make(chan *bpCoinBaseMsg, 0),
+		Quit:             false,
+	}
+	return &bps
+}
+
+func SpawnBitProphetClient() *BitProphetClient {
+	var bp = BitProphetClient{
+		ServiceRoster: make([]string, 0),
+		OutMsgQueue:   make([]string, 0),
+	}
+	return &bp
+}
+
+func (b *bpService) Run() {
+	b.ReportingChannel <- &bpServiceEvent{
+		Time:      time.Now(),
+		EventType: "INTERNAL",
+		EventData: "BitProphet Service Starting...",
+	}
+	for {
+		select {
+		case cmd := <-b.CommandChannel:
+			{
+				fmt.Printf("[bpService] \tCommand: \t[%s]\r\n", cmd.Command)
+				// Check command, execute
+				// report back
+				b.ReportingChannel <- &bpServiceEvent{
+					Time:      time.Now(),
+					EventType: "INTERNAL",
+					EventData: fmt.Sprintf("EXECUTING COMMAND: [%s]", cmd.Command),
+				}
+			}
+		case cbMsg := <-b.CoinbaseChannel:
+			{
+				fmt.Printf("[bpService] \t[Coinbase MSG] \t[%s]\r\n", cbMsg.MsgBody)
+			}
+		}
+		if b.Quit {
+			b.ReportingChannel <- &bpServiceEvent{
+				Time:      time.Now(),
+				EventType: "INTERNAL",
+				EventData: "BitProphet Service Stopping...",
+			}
+			break
+		}
+	}
+}

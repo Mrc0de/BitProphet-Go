@@ -13,6 +13,11 @@ type Configuration struct {
 		CertFile string `yaml:"certfile"`
 		KeyFile  string `yaml:"keyfile"`
 	} `yaml:"web"`
+	InfluxDataBase struct {
+		Host string `yaml:"host"`
+		User string `yaml:"user"`
+		Pass string `yaml:"pass"`
+	} `yaml:"influxdatabase"`
 }
 
 func (s *Configuration) load(confFile string) error {
