@@ -55,6 +55,7 @@ type BitProphetClient struct {
 	Connected      bool
 	ParentService  *bpService
 	CBWriteChannel chan string
+	QuitChannel    chan bool
 }
 
 func CreateBPService() *bpService {
@@ -79,6 +80,7 @@ func SpawnBitProphetClient() *BitProphetClient {
 		Connected:      false,
 		ParentService:  nil,
 		CBWriteChannel: make(chan string, 0),
+		QuitChannel:    make(chan bool, 0),
 	}
 	return &bp
 }
@@ -139,7 +141,25 @@ func (b *BitProphetClient) ConnectCoinbase() error {
 		EventData: fmt.Sprintf("Connected to Coinbase: %s", b.WSHost),
 	}
 	go b.ReadPump()
-
+	go b.WritePump()
+	go func() {
+		for {
+			select {
+			case qSignal := <-b.QuitChannel:
+				{
+					if qSignal {
+						b.ParentService.ReportingChannel <- &bpServiceEvent{
+							Time:      time.Now(),
+							EventType: "SERVICE_CLIENT",
+							EventData: "BitProphet Service Client Killed for reconnect",
+						}
+						break
+					}
+				}
+			}
+		}
+	}()
+	return err
 }
 
 func (b *BitProphetClient) ReadPump() {
@@ -151,6 +171,7 @@ func (b *BitProphetClient) ReadPump() {
 			EventType: "SERVICE_CLIENT",
 			EventData: fmt.Sprintf("WEBSOCKET DISCONNECTED"),
 		}
+		b.QuitChannel <- true
 		if err := b.ConnectCoinbase(); err != nil {
 			b.ParentService.ReportingChannel <- &bpServiceEvent{
 				Time:      time.Now(),
@@ -184,9 +205,10 @@ func (b *BitProphetClient) WritePump() {
 		b.ParentService.ReportingChannel <- &bpServiceEvent{
 			Time:      time.Now(),
 			EventType: "SERVICE_CLIENT",
-			EventData: fmt.Sprintf("WEBSOCKET DISCONNECTED [SLEEPING 5m]"),
+			EventData: fmt.Sprintf("WEBSOCKET DISCONNECTED [SLEEPING 1m]"),
 		}
-		time.Sleep(time.Minute * 5)
+		b.QuitChannel <- true
+		time.Sleep(time.Minute * 1)
 		if err := b.ConnectCoinbase(); err != nil {
 			b.ParentService.ReportingChannel <- &bpServiceEvent{
 				Time:      time.Now(),
