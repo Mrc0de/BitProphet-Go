@@ -18,6 +18,10 @@ type Configuration struct {
 		User string `yaml:"user"`
 		Pass string `yaml:"pass"`
 	} `yaml:"influxdatabase"`
+	BitProphetServiceClient struct {
+		DefaultSubList []string `yaml:"defaultsubscribelist"`
+		WSHost         string   `yaml:"wshost"`
+	} `yaml:"bitprophetserviceclient"`
 }
 
 func (s *Configuration) load(confFile string) error {

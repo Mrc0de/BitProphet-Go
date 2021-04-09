@@ -1,7 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"github.com/gorilla/websocket"
+	"net/http"
 	"time"
 )
 
@@ -44,8 +47,14 @@ type BitProphetClient struct {
 	// wsClient that connects to coinbase
 	// Native Authentication for host user (optional) (server side config file or envvar)
 	// Public Authentication (OAUTH) for other users
-	ServiceRoster []string // need user object, roster of users using BPService
-	OutMsgQueue   []string // need msg object, queue outgoing WS requests to prevent flooding coinbase, establish acceptable msg per second
+	ServiceRoster  []string // need user object, roster of users using BPService
+	OutMsgQueue    []string // need msg object, queue outgoing WS requests to prevent flooding coinbase, establish acceptable msg per second
+	WSHost         string
+	WSConn         *websocket.Conn
+	HTTPResp       *http.Response
+	Connected      bool
+	ParentService  *bpService
+	CBWriteChannel chan string
 }
 
 func CreateBPService() *bpService {
@@ -56,17 +65,25 @@ func CreateBPService() *bpService {
 		CoinbaseChannel:  make(chan *bpCoinBaseMsg, 0),
 		Quit:             false,
 	}
+	bps.Client.ParentService = &bps
 	return &bps
 }
 
 func SpawnBitProphetClient() *BitProphetClient {
 	var bp = BitProphetClient{
-		ServiceRoster: make([]string, 0),
-		OutMsgQueue:   make([]string, 0),
+		ServiceRoster:  make([]string, 0),
+		OutMsgQueue:    make([]string, 0),
+		WSHost:         Config.BitProphetServiceClient.WSHost,
+		WSConn:         nil,
+		HTTPResp:       nil,
+		Connected:      false,
+		ParentService:  nil,
+		CBWriteChannel: make(chan string, 0),
 	}
 	return &bp
 }
 
+// Service Run
 func (b *bpService) Run() {
 	b.ReportingChannel <- &bpServiceEvent{
 		Time:      time.Now(),
@@ -85,6 +102,9 @@ func (b *bpService) Run() {
 					EventType: "INTERNAL",
 					EventData: fmt.Sprintf("EXECUTING COMMAND: [%s]", cmd.Command),
 				}
+				if cmd.Command == "QUITNOW" {
+					b.Quit = true
+				}
 			}
 		case cbMsg := <-b.CoinbaseChannel:
 			{
@@ -98,6 +118,97 @@ func (b *bpService) Run() {
 				EventData: "BitProphet Service Stopping...",
 			}
 			break
+		}
+	}
+}
+
+// CLIENT connect
+func (b *BitProphetClient) ConnectCoinbase() error {
+	var err error
+	d := websocket.DefaultDialer
+	d.TLSClientConfig = &tls.Config{}
+	d.TLSClientConfig.ServerName = b.WSHost
+	b.WSConn, b.HTTPResp, err = d.Dial("wss://"+b.WSHost, nil)
+	if err != nil {
+		return fmt.Errorf("[ConnectCoinbase] Error: %s", err)
+	}
+	b.Connected = true
+	b.ParentService.ReportingChannel <- &bpServiceEvent{
+		Time:      time.Now(),
+		EventType: "SERVICE_CLIENT",
+		EventData: fmt.Sprintf("Connected to Coinbase: %s", b.WSHost),
+	}
+	go b.ReadPump()
+
+}
+
+func (b *BitProphetClient) ReadPump() {
+	defer func() {
+		b.WSConn.Close()
+		b.Connected = false
+		b.ParentService.ReportingChannel <- &bpServiceEvent{
+			Time:      time.Now(),
+			EventType: "SERVICE_CLIENT",
+			EventData: fmt.Sprintf("WEBSOCKET DISCONNECTED"),
+		}
+		if err := b.ConnectCoinbase(); err != nil {
+			b.ParentService.ReportingChannel <- &bpServiceEvent{
+				Time:      time.Now(),
+				EventType: "SERVICE_CLIENT",
+				EventData: fmt.Sprintf("RECONNECT ERROR: %s", err),
+			}
+		}
+	}()
+	for {
+		_, msg, err := b.WSConn.ReadMessage()
+		if err != nil {
+			b.ParentService.ReportingChannel <- &bpServiceEvent{
+				Time:      time.Now(),
+				EventType: "SERVICE_CLIENT",
+				EventData: fmt.Sprintf("READ ERROR: %s", err),
+			}
+			break
+		}
+		b.ParentService.CoinbaseChannel <- &bpCoinBaseMsg{
+			Time:    time.Now(),
+			MsgType: "COINBASE",
+			MsgBody: msg,
+		}
+	}
+}
+
+func (b *BitProphetClient) WritePump() {
+	defer func() {
+		b.WSConn.Close()
+		b.Connected = false
+		b.ParentService.ReportingChannel <- &bpServiceEvent{
+			Time:      time.Now(),
+			EventType: "SERVICE_CLIENT",
+			EventData: fmt.Sprintf("WEBSOCKET DISCONNECTED [SLEEPING 5m]"),
+		}
+		time.Sleep(time.Minute * 5)
+		if err := b.ConnectCoinbase(); err != nil {
+			b.ParentService.ReportingChannel <- &bpServiceEvent{
+				Time:      time.Now(),
+				EventType: "SERVICE_CLIENT",
+				EventData: fmt.Sprintf("RECONNECT ERROR: %s", err),
+			}
+		}
+	}()
+	for {
+		select {
+		case msg := <-b.CBWriteChannel:
+			{
+				err := b.WSConn.WriteMessage(websocket.TextMessage, []byte(msg))
+				if err != nil {
+					b.ParentService.ReportingChannel <- &bpServiceEvent{
+						Time:      time.Now(),
+						EventType: "SERVICE_CLIENT",
+						EventData: fmt.Sprintf("WRITE ERROR: %s", err),
+					}
+					break
+				}
+			}
 		}
 	}
 }

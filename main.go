@@ -68,6 +68,11 @@ func main() {
 	// Start up Backend Service (BitProphetService)
 	BitProphet := CreateBPService()
 	go BitProphet.Run()
+	err = BitProphet.Client.ConnectCoinbase()
+	if err != nil {
+		logger.Printf("[ERROR] Cannot Connect Coinbase Client: \t %s", err)
+		os.Exit(1)
+	}
 
 	// Loop
 	for {
