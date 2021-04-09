@@ -127,16 +127,17 @@ func (b *bpService) Run() {
 // CLIENT connect
 func (b *BitProphetClient) ConnectCoinbase() error {
 	var err error
-	d := websocket.DefaultDialer
-	d.TLSClientConfig = &tls.Config{
-		ServerName: b.WSHost,
-	}
-	d.TLSClientConfig.ServerName = b.WSHost
 	b.ParentService.ReportingChannel <- &bpServiceEvent{
 		Time:      time.Now(),
 		EventType: "SERVICE_CLIENT",
 		EventData: fmt.Sprintf("Connecting to Coinbase: wss://%s", b.WSHost),
 	}
+	d := websocket.DefaultDialer
+	d.TLSClientConfig = &tls.Config{
+		ServerName: b.WSHost,
+	}
+	d.TLSClientConfig.ServerName = b.WSHost
+
 	b.WSConn, b.HTTPResp, err = d.Dial("wss://"+b.WSHost, nil)
 	if err != nil {
 		return fmt.Errorf("[ConnectCoinbase] Error: %s", err)
