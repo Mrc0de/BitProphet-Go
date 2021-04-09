@@ -128,7 +128,9 @@ func (b *bpService) Run() {
 func (b *BitProphetClient) ConnectCoinbase() error {
 	var err error
 	d := websocket.DefaultDialer
-	d.TLSClientConfig = &tls.Config{}
+	d.TLSClientConfig = &tls.Config{
+		ServerName: b.WSHost,
+	}
 	d.TLSClientConfig.ServerName = b.WSHost
 	b.ParentService.ReportingChannel <- &bpServiceEvent{
 		Time:      time.Now(),
@@ -161,10 +163,10 @@ func (b *BitProphetClient) ConnectCoinbase() error {
 						break
 					}
 				}
-			default:
-				{
-					//
-				}
+				//default:
+				//	{
+				//		//
+				//	}
 			}
 		}
 	}()
