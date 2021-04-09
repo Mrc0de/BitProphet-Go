@@ -19,8 +19,7 @@ type Configuration struct {
 		Pass string `yaml:"pass"`
 	} `yaml:"influxdatabase"`
 	BitProphetServiceClient struct {
-		DefaultSubList []string
-		WSHost         string `yaml:"wshost"`
+		WSHost string `yaml:"wshost"`
 	} `yaml:"bitprophetserviceclient"`
 }
 

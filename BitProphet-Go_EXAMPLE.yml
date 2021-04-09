@@ -1,0 +1,14 @@
+web:
+  listen: 0.0.0.0
+  host: yourhost.com
+  path: /var/BitProphet-Go/web
+  certfile: /etc/letsencrypt/live/yourhost.com/fullchain.pem
+  keyfile: /etc/letsencrypt/live/yourhost.com/privkey.pem
+
+influxdatabase:
+  host:
+  user:
+  pass:
+
+bitprophetserviceclient:
+  wshost: ws-feed.pro.coinbase.com
