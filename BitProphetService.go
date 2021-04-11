@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -41,6 +42,27 @@ type bpCoinBaseMsg struct {
 	Time    time.Time
 	MsgType string
 	MsgBody []byte
+	MsgObj  CoinbaseMessage
+}
+
+type CoinbaseMessage struct {
+	Type     string `json:"type"`
+	Sequence int64  `json:"sequence"`
+	TradeID  int64  `json:"trade_id"`
+	// literally everything else is coming down as a string from the json
+	ProductID    string `json:"product_id"`
+	Price        string `json:"price"`
+	Open24Hour   string `json:"open_24h"`
+	Volume24Hour string `json:"volume_24h"`
+	Low24Hour    string `json:"low_24h"`
+	High24Hour   string `json:"high_24h"`
+	Volume30Day  string `json:"volume_30d"`
+	BestBid      string `json:"best_bid"`
+	BestAsk      string `json:"best_ask"`
+	Side         string `json:"side"`
+	TimeStr      string `json:"time"`
+	Time         time.Time
+	LastSize     string `json:"last_size"`
 }
 
 type bpCBSubscribeRequest struct {
@@ -65,7 +87,7 @@ type bpCBSubscribeRequest struct {
 	//        }
 	//    ]
 	//}
-	// The code makes the two rogues handling more obvious (json append)
+	// The ConnectCoinbase() code makes the handling more obvious
 }
 
 type bpCBPrice struct {
@@ -142,7 +164,11 @@ func (b *bpService) Run() {
 			}
 		case cbMsg := <-b.CoinbaseChannel:
 			{
-				fmt.Printf("[bpService] \t[Coinbase MSG] \t[%s]\r\n", cbMsg.MsgBody)
+				b.ReportingChannel <- &bpServiceEvent{
+					Time:      time.Now(),
+					EventType: "COINBASE",
+					EventData: fmt.Sprintf("[bpService] \t[Coinbase MSG] \t[%s]\r\n", cbMsg.MsgObj.Type),
+				}
 			}
 		}
 		if b.Quit {
@@ -180,7 +206,7 @@ func (b *BitProphetClient) ConnectCoinbase() error {
 	for _, coin := range Config.BitProphetServiceClient.DefaultSubscriptions {
 		logger.Printf("[ConnectCoinbase] Subscribing to [%s]", coin)
 		var finalJson []string
-		finalJson = append(finalJson, "heartbeat", "ticker")
+		finalJson = append(finalJson, "ticker") // I removed heartbeat because I forgot what it was for and I dont think I need it at all, it goes here
 		subMsg := bpCBSubscribeRequest{"subscribe", []string{coin}, finalJson}
 		if err := b.WSConn.WriteJSON(subMsg); err != nil {
 			return fmt.Errorf("[ConnectCoinbase] Subscribe Error: %s", err)
@@ -242,10 +268,22 @@ func (b *BitProphetClient) ReadPump() {
 			}
 			break
 		}
-		b.ParentService.CoinbaseChannel <- &bpCoinBaseMsg{
-			Time:    time.Now(),
-			MsgType: "COINBASE",
-			MsgBody: msg,
+		var obj CoinbaseMessage
+		err = json.Unmarshal(msg, &obj)
+		if err != nil {
+			b.ParentService.ReportingChannel <- &bpServiceEvent{
+				Time:      time.Now(),
+				EventType: "SERVICE_CLIENT",
+				EventData: fmt.Sprintf("JSON Unmarshall ERROR: %s", err),
+			}
+			// dont break out, just report it
+		} else {
+			b.ParentService.CoinbaseChannel <- &bpCoinBaseMsg{
+				Time:    time.Now(),
+				MsgType: "COINBASE",
+				MsgBody: msg,
+				MsgObj:  obj,
+			}
 		}
 	}
 }
