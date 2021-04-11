@@ -167,7 +167,7 @@ func (b *bpService) Run() {
 				b.ReportingChannel <- &bpServiceEvent{
 					Time:      time.Now(),
 					EventType: "COINBASE",
-					EventData: fmt.Sprintf("[bpService] [%s]", cbMsg.MsgObj.Type),
+					EventData: fmt.Sprintf("[bpService] [%s] [%s] [%s] [%s] [%s]", cbMsg.MsgObj.Type, cbMsg.MsgObj.ProductID, cbMsg.MsgObj.Price, cbMsg.MsgObj.BestAsk, cbMsg.MsgObj.BestBid),
 				}
 			}
 		}
