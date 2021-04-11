@@ -169,6 +169,23 @@ func (b *bpService) Run() {
 					EventType: "COINBASE",
 					EventData: fmt.Sprintf("[bpService] [%s] [%s] [%s] [%s] [%s]", cbMsg.MsgObj.Type, cbMsg.MsgObj.ProductID, cbMsg.MsgObj.Price, cbMsg.MsgObj.BestAsk, cbMsg.MsgObj.BestBid),
 				}
+				i := influx{}
+				err := i.Connect()
+				if err != nil {
+					b.ReportingChannel <- &bpServiceEvent{
+						Time:      time.Now(),
+						EventType: "INTERNAL",
+						EventData: fmt.Sprintf("[bpService] [INFLUX_ERROR] [%s]", err),
+					}
+				}
+				err = i.WriteCoinbaseTicker(cbMsg.MsgObj)
+				if err != nil {
+					b.ReportingChannel <- &bpServiceEvent{
+						Time:      time.Now(),
+						EventType: "INTERNAL",
+						EventData: fmt.Sprintf("[bpService] [INFLUX_ERROR] [%s]", err),
+					}
+				}
 			}
 		}
 		if b.Quit {
