@@ -43,6 +43,38 @@ type bpCoinBaseMsg struct {
 	MsgBody []byte
 }
 
+type bpCBSubscribeRequest struct {
+	Type     string   `json:"type"` // subscribe
+	Products []string `json:"product_ids"`
+	Channels []string `json:"channels"`
+	//{
+	//    "type": "subscribe",
+	//    "product_ids": [
+	//        "ETH-USD",
+	//        "ETH-EUR"
+	//    ],
+	//    "channels": [
+	//        "level2",
+	//        "heartbeat",
+	//        {
+	//            "name": "ticker",
+	//            "product_ids": [
+	//                "ETH-BTC",
+	//                "ETH-USD"
+	//            ]
+	//        }
+	//    ]
+	//}
+	// The code makes the two rogues handling more obvious (json append)
+}
+
+type bpCBPrice struct {
+	Market string
+	Bid    float64
+	Ask    float64
+	Last   float64
+}
+
 type BitProphetClient struct {
 	// wsClient that connects to coinbase
 	// Native Authentication for host user (optional) (server side config file or envvar)
@@ -144,6 +176,18 @@ func (b *BitProphetClient) ConnectCoinbase() error {
 		EventType: "SERVICE_CLIENT",
 		EventData: fmt.Sprintf("Connected to Coinbase: %s", b.WSHost),
 	}
+	// We are connected, subscribe to defaults
+	for _, coin := range Config.BitProphetServiceClient.DefaultSubscriptions {
+		logger.Printf("[ConnectCoinbase] Subscribing to [%s]", coin)
+		var finalJson []string
+		finalJson = append(finalJson, "heartbeat", "ticker")
+		subMsg := bpCBSubscribeRequest{"subscribe", []string{coin}, finalJson}
+		if err := b.WSConn.WriteJSON(subMsg); err != nil {
+			return fmt.Errorf("[ConnectCoinbase] Subscribe Error: %s", err)
+		}
+	}
+	logger.Printf("[ConnectCoinbase] Subscribing Complete.")
+	//////////////
 	go b.ReadPump()
 	go b.WritePump()
 	go func() {

@@ -99,11 +99,11 @@ func main() {
 			break
 		}
 		if first {
-			//err = BitProphet.Client.ConnectCoinbase()
-			//if err != nil {
-			//	logger.Printf("[ERROR] Cannot Connect Coinbase Client: \t %s", err)
-			//	os.Exit(1)
-			//}
+			err = BitProphet.Client.ConnectCoinbase()
+			if err != nil {
+				logger.Printf("[ERROR] Cannot Connect Coinbase Client: \t %s", err)
+				os.Exit(1)
+			}
 			first = false
 		}
 	}

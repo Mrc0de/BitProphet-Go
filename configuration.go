@@ -18,8 +18,9 @@ type Configuration struct {
 		User string `yaml:"user"`
 		Pass string `yaml:"pass"`
 	} `yaml:"influxdatabase"`
-	BitProphetServiceClient struct {
-		WSHost string `yaml:"wshost"`
+	BitProphetServiceClient struct { // Connects to Coinbase and Influx
+		DefaultSubscriptions []string `yaml:"defaultsubscriptions"`
+		WSHost               string   `yaml:"wshost"`
 	} `yaml:"bitprophetserviceclient"`
 }
 

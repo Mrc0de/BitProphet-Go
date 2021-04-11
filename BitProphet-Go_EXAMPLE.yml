@@ -11,4 +11,5 @@ influxdatabase:
   pass:
 
 bitprophetserviceclient:
+  defaultsubscriptions: ["BTC-USD","ETH-USD","LTC-USD"]
   wshost: ws-feed.pro.coinbase.com
