@@ -33,6 +33,13 @@ func (s *Configuration) load(confFile string) error {
 	if err != nil {
 		return err
 	}
+	logger.Printf("(\\.....\\..........,/)")
+	logger.Printf(".\\(....|\\.........)/")
+	logger.Printf(".//\\...| \\......./\\\\")
+	logger.Printf("(/./\\_#oo#_/\\.\\)")
+	logger.Printf(".\\/\\..####../\\/")
+	logger.Printf("......`##'......")
+	logger.Printf("[!] bitProphet [!]")
 	if Debug {
 		logger.Printf("Host: %s ", s.Web.Host)
 		logger.Printf("Path: %s", s.Web.Path)
