@@ -4,6 +4,7 @@ import (
 	"fmt"
 	client "github.com/influxdata/influxdb1-client"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -31,15 +32,28 @@ func (i *influx) Connect() error {
 }
 
 func (i *influx) WriteCoinbaseTicker(ticker CoinbaseMessage) error {
+	a, err := strconv.ParseFloat(ticker.BestAsk, 32)
+	if err != nil {
+		return err
+	}
+	b, err := strconv.ParseFloat(ticker.BestBid, 32)
+	if err != nil {
+		return err
+	}
+	p, err := strconv.ParseFloat(ticker.Price, 32)
+	if err != nil {
+		return err
+	}
+
 	pt := client.Point{
 		Measurement: "tickers",
 		Tags: map[string]string{
 			"market": ticker.ProductID,
 		},
 		Fields: map[string]interface{}{
-			"ask":   ticker.BestAsk,
-			"bid":   ticker.BestBid,
-			"price": ticker.Price,
+			"ask":   a,
+			"bid":   b,
+			"price": p,
 		},
 		Time:      time.Now(),
 		Precision: "s",
@@ -51,7 +65,7 @@ func (i *influx) WriteCoinbaseTicker(ticker CoinbaseMessage) error {
 		Tags:      pt.Tags,
 		Precision: "s",
 	}
-	_, err := i.Client.Write(bp)
+	_, err = i.Client.Write(bp)
 	if err != nil {
 		return err
 	}
