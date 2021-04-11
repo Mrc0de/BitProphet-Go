@@ -34,8 +34,10 @@ func (s *Configuration) load(confFile string) error {
 		return err
 	}
 	if Debug {
-		logger.Printf("Host: %s \tPath: %s", s.Web.Host, s.Web.Path)
-		logger.Printf("Cert: %s \tKey: %s", s.Web.CertFile, s.Web.KeyFile)
+		logger.Printf("Host: %s ", s.Web.Host)
+		logger.Printf("Path: %s", s.Web.Path)
+		logger.Printf("Cert: %s", s.Web.CertFile)
+		logger.Printf("Key: %s", s.Web.KeyFile)
 		logger.Printf("WSHost: %s", s.BitProphetServiceClient.WSHost)
 		logger.Printf("InfluxHost: %s", s.InfluxDatabase.Host)
 	}
