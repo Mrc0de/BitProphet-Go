@@ -22,7 +22,7 @@ func (i *influx) Connect() error {
 		Username:   Config.InfluxDatabase.User,
 		Password:   Config.InfluxDatabase.Pass,
 		UserAgent:  "BitProphet-Go",
-		Timeout:    2,
+		Timeout:    3 * time.Second,
 	})
 	if err != nil {
 		return err
