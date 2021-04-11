@@ -110,6 +110,7 @@ type BitProphetClient struct {
 	ParentService  *bpService
 	CBWriteChannel chan string
 	QuitChannel    chan bool
+	Influx         influx
 }
 
 func CreateBPService() *bpService {
@@ -146,6 +147,14 @@ func (b *bpService) Run() {
 		EventType: "INTERNAL",
 		EventData: "BitProphet Service Starting...",
 	}
+	err := b.Client.Influx.Connect()
+	if err != nil {
+		b.ReportingChannel <- &bpServiceEvent{
+			Time:      time.Now(),
+			EventType: "INTERNAL",
+			EventData: fmt.Sprintf("[bpService] [INFLUX_CONNECT_ERROR] [%s]", err),
+		}
+	}
 	for {
 		select {
 		case cmd := <-b.CommandChannel:
@@ -169,21 +178,12 @@ func (b *bpService) Run() {
 					EventType: "COINBASE",
 					EventData: fmt.Sprintf("[bpService] [%s] [%s] [%s] [%s] [%s]", cbMsg.MsgObj.Type, cbMsg.MsgObj.ProductID, cbMsg.MsgObj.Price, cbMsg.MsgObj.BestAsk, cbMsg.MsgObj.BestBid),
 				}
-				i := influx{}
-				err := i.Connect()
+				err = b.Client.Influx.WriteCoinbaseTicker(cbMsg.MsgObj)
 				if err != nil {
 					b.ReportingChannel <- &bpServiceEvent{
 						Time:      time.Now(),
 						EventType: "INTERNAL",
-						EventData: fmt.Sprintf("[bpService] [INFLUX_ERROR] [%s]", err),
-					}
-				}
-				err = i.WriteCoinbaseTicker(cbMsg.MsgObj)
-				if err != nil {
-					b.ReportingChannel <- &bpServiceEvent{
-						Time:      time.Now(),
-						EventType: "INTERNAL",
-						EventData: fmt.Sprintf("[bpService] [INFLUX_ERROR] [%s]", err),
+						EventData: fmt.Sprintf("[bpService] [INFLUX_WRITE_ERROR] [%s]", err),
 					}
 				}
 			}

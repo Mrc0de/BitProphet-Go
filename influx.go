@@ -17,12 +17,11 @@ func (i *influx) Connect() error {
 		return err
 	}
 	con, err := client.NewClient(client.Config{
-		URL:        *host,
-		UnixSocket: "",
-		Username:   Config.InfluxDatabase.User,
-		Password:   Config.InfluxDatabase.Pass,
-		UserAgent:  "BitProphet-Go",
-		Timeout:    3 * time.Second,
+		URL:       *host,
+		Username:  Config.InfluxDatabase.User,
+		Password:  Config.InfluxDatabase.Pass,
+		UserAgent: "BitProphet-Go",
+		Timeout:   2 * time.Second,
 	})
 	if err != nil {
 		return err
@@ -49,6 +48,7 @@ func (i *influx) WriteCoinbaseTicker(ticker CoinbaseMessage) error {
 		Points:    []client.Point{pt},
 		Database:  "coinbasePriceHistory",
 		Time:      time.Now(),
+		Tags:      pt.Tags,
 		Precision: "s",
 	}
 	_, err := i.Client.Write(bp)
