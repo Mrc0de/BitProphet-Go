@@ -1,9 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	api "github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
+	api "github.com/mrc0de/BitProphet-Go/CoinbaseAPI" //shit like this is why we cant have nice things....
 	"html/template"
 	"io/ioutil"
 	"net"
@@ -152,6 +153,12 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	// If this works well enough, I might never make other users muuuhahahahaha
 	///////////////////////////////////////////////////////////////////////////
 	logger.Printf("[PUBLIC]   [InternalUserStats]")
-	req := api.NewSecureRequest("list_accounts")
-	logger.Printf("%v", req)
+	req := api.NewSecureRequest("list_accounts")             // create the req
+	req.Credentials.Key = Config.BPInternalAccount.AccessKey // setup it's creds
+	req.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
+	req.Credentials.Secret = Config.BPInternalAccount.Secret
+	resp, err := req.Process(logger) // process req
+
+	logger.Printf("RESP: %v \t ------ \tE:\t %s", resp, err)
+	json.NewEncoder(w).Encode(resp)
 }
