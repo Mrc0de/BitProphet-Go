@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	_ "github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
 	api "github.com/mrc0de/BitProphet-Go/CoinbaseAPI" //shit like this is why we cant have nice things....
 	"html/template"
 	"io/ioutil"
