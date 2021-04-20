@@ -76,6 +76,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 			debug.PrintStack()
 		}
 	}()
+	logger.Println("[SecureRequest::Process]")
 	var (
 		err error
 		req *http.Request
