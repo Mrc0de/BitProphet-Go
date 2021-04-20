@@ -97,7 +97,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	// Generate the signature
 	// decode Base64 secret
 	sec := make([]byte, 64)
-	fmt.Printf("Secret Len: %d", len(s.Credentials.Secret))
+	logger.Printf("Secret Len: %d", len(s.Credentials.Secret))
 	num, err := base64.StdEncoding.Decode(sec, []byte(s.Credentials.Secret))
 	if err != nil {
 		fmt.Printf("Error decoding secret: %s", err)
