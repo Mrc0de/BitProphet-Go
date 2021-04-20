@@ -61,7 +61,7 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 			},
 			CheckRedirect: nil,
 			Jar:           nil,
-			Timeout:       5,
+			Timeout:       5 * time.Second,
 		},
 	}
 }
