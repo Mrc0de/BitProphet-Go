@@ -21,25 +21,7 @@ type SecureRequest struct {
 	RequestBody   string
 	Client        *http.Client
 	Timestamp     time.Time
-	Credentials   CoinbaseCredentials
-}
-
-type CoinbaseCredentials struct {
-	// PRIVATE! NEVER EXPOSE!
-	Key        string
-	Passphrase string
-	Secret     string
-}
-
-type CoinbaseAccount struct {
-	// PRIVATE! NEVER EXPOSE directly!
-	AccountID      string  `json:"id"`
-	Currency       string  `json:"currency"`
-	Balance        float64 `json:"balance"`
-	Available      float64 `json:"available"`
-	Hold           float64 `json:"hold"`
-	ProfileID      string  `json:"profile_id"`
-	TradingEnabled bool    `json:"trading_enabled"`
+	Credentials   *CoinbaseCredentials
 }
 
 func NewSecureRequest(RequestName string) *SecureRequest {
@@ -48,7 +30,7 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 		RequestName:   RequestName,
 		RequestMethod: "GET", // default, change as needed
 		Timestamp:     time.Now(),
-		Credentials: CoinbaseCredentials{
+		Credentials: &CoinbaseCredentials{
 			Key:        "",
 			Passphrase: "",
 			Secret:     "",
@@ -82,6 +64,24 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 			Timeout:       5,
 		},
 	}
+}
+
+type CoinbaseCredentials struct {
+	// PRIVATE! NEVER EXPOSE!
+	Key        string
+	Passphrase string
+	Secret     string
+}
+
+type CoinbaseAccount struct {
+	// PRIVATE! NEVER EXPOSE directly!
+	AccountID      string  `json:"id"`
+	Currency       string  `json:"currency"`
+	Balance        float64 `json:"balance"`
+	Available      float64 `json:"available"`
+	Hold           float64 `json:"hold"`
+	ProfileID      string  `json:"profile_id"`
+	TradingEnabled bool    `json:"trading_enabled"`
 }
 
 func UrlForRequestName(name string) string {
