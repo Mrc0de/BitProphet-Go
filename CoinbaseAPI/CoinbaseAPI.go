@@ -6,8 +6,10 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -68,6 +70,12 @@ func UrlForRequestName(name string) string {
 }
 
 func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Print("UNCAUGHT EXCEPTION: %s", r)
+			debug.PrintStack()
+		}
+	}()
 	var (
 		err error
 		req *http.Request
