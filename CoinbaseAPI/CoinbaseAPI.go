@@ -100,7 +100,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		return reply, err
 	}
 	if logger != nil {
-		logger.Printf("[SecureRequest::Process] Decoded Secret Len: %d", num)
+		logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", num)
 	}
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
@@ -114,10 +114,15 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	if len(s.RequestBody) > 1 {
 		h.Write([]byte(s.RequestBody))
 	}
-	shaStr := hex.EncodeToString(h.Sum(nil))
+	var sha []byte
+	num = hex.Encode(sha, h.Sum(nil))
+	if logger != nil {
+		logger.Printf("[SecureRequest::Process] Encode Signature Length: %d", num)
+	}
 	// encode the result to base64
-	_ := base64.StdEncoding.EncodeToString([]byte(shaStr))
-	req.Header.Set("CB-ACCESS-SIGN", shaStr)
+	var shaEnc []byte
+	base64.StdEncoding.Encode(shaEnc, sha)
+	req.Header.Set("CB-ACCESS-SIGN", string(sha))
 
 	// Send
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
