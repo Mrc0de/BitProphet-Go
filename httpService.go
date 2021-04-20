@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	api "github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
 	"html/template"
 	"io/ioutil"
 	"net"
@@ -151,6 +152,6 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	// If this works well enough, I might never make other users muuuhahahahaha
 	///////////////////////////////////////////////////////////////////////////
 	logger.Printf("[PUBLIC]   [InternalUserStats]")
-	req := CoinbaseAPI.NewSecureRequest("list_accounts")
+	req := api.NewSecureRequest("list_accounts")
 	logger.Printf("%v", req)
 }
