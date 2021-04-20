@@ -121,10 +121,10 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	sha := make([]byte, 64)
 	num = hex.Encode(sha, h.Sum(nil))
 	if logger != nil {
-		logger.Printf("[SecureRequest::Process] Encode Signature Length: %d", num)
+		logger.Printf("[SecureRequest::Process] Encoded Signature Length: %d", num)
 	}
 	// encode the result to base64
-	var shaEnc []byte
+	shaEnc := make([]byte, 64)
 	base64.StdEncoding.Encode(shaEnc, sha)
 	req.Header.Set("CB-ACCESS-SIGN", string(sha))
 
