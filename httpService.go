@@ -153,5 +153,5 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	///////////////////////////////////////////////////////////////////////////
 	logger.Printf("[PUBLIC]   [InternalUserStats]")
 	req := CoinbaseAPI.NewSecureRequest("list_accounts")
-	logger.Printf("")
+	logger.Printf("%v", req)
 }
