@@ -92,19 +92,21 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		}
 		return reply, err
 	}
-	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("CB-ACCESS-KEY", s.Credentials.Key)
 	req.Header.Set("CB-ACCESS-TIMESTAMP", string(s.Timestamp.Unix()))
 	req.Header.Set("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
 	// Generate the signature
 	// decode Base64 secret
-	sec, err := base64.StdEncoding.DecodeString(s.Credentials.Secret)
+	var sec []byte
+	num, err := base64.StdEncoding.Decode(sec, []byte(s.Credentials.Secret))
 	if err != nil {
 		if logger != nil {
 			logger.Printf("Error decoding secret: %s", err)
 		}
 		return reply, err
 	}
+	logger.Printf("[SecureRequest::Process] Decoded Secret Len: %d", num)
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
 	// write timestamp
