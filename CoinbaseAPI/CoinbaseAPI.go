@@ -19,7 +19,6 @@ type SecureRequest struct {
 	RequestName   string
 	RequestMethod string
 	RequestBody   string
-	Client        *http.Client
 	Timestamp     time.Time
 	Credentials   *CoinbaseCredentials
 }
@@ -34,12 +33,6 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 			Key:        "",
 			Passphrase: "",
 			Secret:     "",
-		},
-		Client: &http.Client{
-			Transport:     http.DefaultTransport,
-			CheckRedirect: nil,
-			Jar:           nil,
-			Timeout:       15 * time.Second,
 		},
 	}
 }
@@ -128,8 +121,9 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 
 	// Send
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
-	s.Client.Timeout = 20 * time.Second
-	resp, err := s.Client.Do(req)
+	c := &http.Client{}
+	c.Timeout = 20 * time.Second
+	resp, err := c.Do(req)
 	if err != nil {
 		if logger != nil {
 			logger.Printf("Error reading response: %s", err)
