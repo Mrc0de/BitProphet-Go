@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -42,7 +43,7 @@ func (h *httpService) Init() {
 	r := mux.NewRouter().StrictSlash(true)
 	// routes
 	r.HandleFunc("/", WWWHome).Methods("GET")
-	r.HandleFunc("/stats/user/default", InternalUserStats).Methods("GET")
+	r.HandleFunc("/stats/user/default", processTimeout(InternalUserStats, 10*time.Second)).Methods("GET")
 	//r.HandleFunc("/stats/market/{id}", WWWHome).Methods("POST")
 	r.Use(h.LogRequest)
 
@@ -107,6 +108,24 @@ func WWWHome(w http.ResponseWriter, r *http.Request) {
 	err := tmpl.Execute(w, &data)
 	if err != nil {
 		logger.Printf("Error Parsing Template: %s", err)
+	}
+}
+
+func processTimeout(h http.HandlerFunc, duration time.Duration) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), duration)
+		defer cancel()
+		r = r.WithContext(ctx)
+		processDone := make(chan bool)
+		go func() {
+			h(w, r)
+			processDone <- true
+		}()
+		select {
+		case <-ctx.Done():
+			w.Write([]byte(`{"error": "process timeout"}`))
+		case <-processDone:
+		}
 	}
 }
 
