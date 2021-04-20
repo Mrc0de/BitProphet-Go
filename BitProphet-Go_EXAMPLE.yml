@@ -13,3 +13,14 @@ influxdatabase:
 bitprophetserviceclient:
   defaultsubscriptions: ["BTC-USD","ETH-USD","LTC-USD"]
   wshost: ws-feed.pro.coinbase.com
+
+bpinternalaccount:
+  accesskey: api_key
+  secret: api_secret
+  passphrase: api_passphrase
+
+bpdata:
+  host: ahost.com
+  user: someuser
+  pass: nottellin
+  database: BitProphet

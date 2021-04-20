@@ -15,11 +15,13 @@ import (
 // performs auto trades according to selected strategies
 
 // This 'Service' runs the 'client' for the 'user', so they dont have to
-// The web interface and accounts system MUST require both authentication to this service, authorization of automated use
+// The web interface and accounts system MUST require both authentication to this service AND authorization of automated use
 // AND some form of auth to coinbase on the users behalf, OAUTH is a good candidate as they can revoke access easily, if desired
 // make sure to detect that happening so we can stop (and notify the user)
 type bpService struct {
 	Client           *BitProphetClient
+	InternalClient   *BitProphetClient
+	Clients          []*BitProphetClient
 	ReportingChannel chan *bpServiceEvent
 	CommandChannel   chan *bpServiceCommandMsg
 	CoinbaseChannel  chan *bpCoinBaseMsg
@@ -45,11 +47,56 @@ type bpCoinBaseMsg struct {
 	MsgObj  CoinbaseMessage
 }
 
+func CreateBPService() *bpService {
+	var bps = bpService{
+		Client:           SpawnBitProphetClient(),
+		InternalClient:   nil,
+		Clients:          make([]*BitProphetClient, 0),
+		ReportingChannel: make(chan *bpServiceEvent, 100),
+		CommandChannel:   make(chan *bpServiceCommandMsg, 0),
+		CoinbaseChannel:  make(chan *bpCoinBaseMsg, 0),
+		Quit:             false,
+	}
+	bps.Client.ParentService = &bps
+	bps.Clients = append(bps.Clients, bps.Client)
+	return &bps
+}
+
+// CLIENT
+type BitProphetClient struct {
+	// wsClient that connects to coinbase
+	// Native Authentication for host user (optional) (server side config file or envvar)
+	// Public Authentication (OAUTH) for other users
+	WSHost            string
+	WSConn            *websocket.Conn
+	HTTPResp          *http.Response
+	Connected         bool
+	ParentService     *bpService
+	CBWriteChannel    chan string
+	QuitChannel       chan bool
+	Influx            influx
+	IsInternalAccount bool
+}
+
+func SpawnBitProphetClient() *BitProphetClient {
+	var bp = BitProphetClient{
+		WSHost:         Config.BitProphetServiceClient.WSHost,
+		WSConn:         nil,
+		HTTPResp:       nil,
+		Connected:      false,
+		ParentService:  nil,
+		CBWriteChannel: make(chan string, 0),
+		QuitChannel:    make(chan bool, 0),
+	}
+	return &bp
+}
+
+// MSGs
 type CoinbaseMessage struct {
 	Type     string `json:"type"`
 	Sequence int64  `json:"sequence"`
 	TradeID  int64  `json:"trade_id"`
-	// literally everything else is coming down as a string from the json
+	// literally everything else is coming down as a string
 	ProductID    string `json:"product_id"`
 	Price        string `json:"price"`
 	Open24Hour   string `json:"open_24h"`
@@ -87,9 +134,10 @@ type bpCBSubscribeRequest struct {
 	//        }
 	//    ]
 	//}
-	// The ConnectCoinbase() code makes the handling more obvious
+	// The ConnectCoinbase() code makes the handling more obvious (to me)
 }
 
+// Misc Types for MSGs
 type bpCBPrice struct {
 	Market string
 	Bid    float64
@@ -97,50 +145,11 @@ type bpCBPrice struct {
 	Last   float64
 }
 
-type BitProphetClient struct {
-	// wsClient that connects to coinbase
-	// Native Authentication for host user (optional) (server side config file or envvar)
-	// Public Authentication (OAUTH) for other users
-	ServiceRoster  []string // need user object, roster of users using BPService
-	OutMsgQueue    []string // need msg object, queue outgoing WS requests to prevent flooding coinbase, establish acceptable msg per second
-	WSHost         string
-	WSConn         *websocket.Conn
-	HTTPResp       *http.Response
-	Connected      bool
-	ParentService  *bpService
-	CBWriteChannel chan string
-	QuitChannel    chan bool
-	Influx         influx
-}
+// ////////////////////////// //
+// BitProphet Service Method //
+// //////////////////////// //
 
-func CreateBPService() *bpService {
-	var bps = bpService{
-		Client:           SpawnBitProphetClient(),
-		ReportingChannel: make(chan *bpServiceEvent, 100),
-		CommandChannel:   make(chan *bpServiceCommandMsg, 0),
-		CoinbaseChannel:  make(chan *bpCoinBaseMsg, 0),
-		Quit:             false,
-	}
-	bps.Client.ParentService = &bps
-	return &bps
-}
-
-func SpawnBitProphetClient() *BitProphetClient {
-	var bp = BitProphetClient{
-		ServiceRoster:  make([]string, 0),
-		OutMsgQueue:    make([]string, 0),
-		WSHost:         Config.BitProphetServiceClient.WSHost,
-		WSConn:         nil,
-		HTTPResp:       nil,
-		Connected:      false,
-		ParentService:  nil,
-		CBWriteChannel: make(chan string, 0),
-		QuitChannel:    make(chan bool, 0),
-	}
-	return &bp
-}
-
-// Service Run
+// bpService Run
 func (b *bpService) Run() {
 	b.ReportingChannel <- &bpServiceEvent{
 		Time:      time.Now(),
@@ -154,6 +163,15 @@ func (b *bpService) Run() {
 			EventType: "INTERNAL",
 			EventData: fmt.Sprintf("[bpService] [INFLUX_CONNECT_ERROR] [%s]", err),
 		}
+	}
+	// Internal Account (if used)
+	if Config.BPInternalAccount.Enabled {
+		b.ReportingChannel <- &bpServiceEvent{
+			Time:      time.Now(),
+			EventType: "INTERNAL",
+			EventData: "BitProphet Internal Account Client Enabled!",
+		}
+
 	}
 	for {
 		select {
@@ -173,11 +191,6 @@ func (b *bpService) Run() {
 			}
 		case cbMsg := <-b.CoinbaseChannel:
 			{
-				b.ReportingChannel <- &bpServiceEvent{
-					Time:      time.Now(),
-					EventType: "COINBASE",
-					EventData: fmt.Sprintf("[bpService] [%s] [%s] [%s] [%s] [%s]", cbMsg.MsgObj.Type, cbMsg.MsgObj.ProductID, cbMsg.MsgObj.Price, cbMsg.MsgObj.BestAsk, cbMsg.MsgObj.BestBid),
-				}
 				if cbMsg.MsgObj.Type == "ticker" {
 					// write ticker to influx
 					err = b.Client.Influx.WriteCoinbaseTicker(cbMsg.MsgObj)
@@ -187,6 +200,12 @@ func (b *bpService) Run() {
 							EventType: "INTERNAL",
 							EventData: fmt.Sprintf("[bpService] [INFLUX_WRITE_ERROR] [%s]", err),
 						}
+					}
+				} else {
+					b.ReportingChannel <- &bpServiceEvent{
+						Time:      time.Now(),
+						EventType: "COINBASE",
+						EventData: fmt.Sprintf("[bpService] [%s] [%s] [%s] [%s] [%s]", cbMsg.MsgObj.Type, cbMsg.MsgObj.ProductID, cbMsg.MsgObj.Price, cbMsg.MsgObj.BestAsk, cbMsg.MsgObj.BestBid),
 					}
 				}
 			}
@@ -202,7 +221,12 @@ func (b *bpService) Run() {
 	}
 }
 
-// CLIENT connect
+// ///////////////////////// //
+// BitProphetClient Methods //
+// /////////////////////// //
+
+//////////////////////////////////////////////
+// CLIENT connect (Websocket, normal, no auth)
 func (b *BitProphetClient) ConnectCoinbase() error {
 	var err error
 	fmt.Printf("Connecting to Coinbase: wss://%s\r\n", b.WSHost)
