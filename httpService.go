@@ -192,5 +192,5 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Printf("RESP: %v \t ------ \tE:\t %s", reply, err)
-	json.NewEncoder(w).Encode(reply)
+	json.NewEncoder(w).Encode(`"ERROR":"goaway"`)
 }
