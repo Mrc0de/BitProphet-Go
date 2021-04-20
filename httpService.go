@@ -41,7 +41,7 @@ func (h *httpService) Init() {
 	r := mux.NewRouter().StrictSlash(true)
 	// routes
 	r.HandleFunc("/", WWWHome).Methods("GET")
-	r.HandleFunc("/stats/user/default", InternalUserStats).Methods("POST")
+	r.HandleFunc("/stats/user/default", InternalUserStats).Methods("GET")
 	//r.HandleFunc("/stats/market/{id}", WWWHome).Methods("POST")
 	r.Use(h.LogRequest)
 

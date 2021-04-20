@@ -3,6 +3,7 @@ package CoinbaseAPI
 import (
 	"net/http"
 	"strings"
+	"time"
 )
 
 type SecureRequest struct {
@@ -10,6 +11,7 @@ type SecureRequest struct {
 	RequestName   string
 	RequestMethod string
 	Client        *http.Client
+	Timestamp     time.Time
 }
 
 type CoinbaseCredentials struct {
@@ -33,6 +35,7 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 		Url:           UrlForRequestName(RequestName),
 		RequestName:   RequestName,
 		RequestMethod: "GET", // default, change as needed
+		Timestamp:     time.Now(),
 		Client: &http.Client{
 			Transport: &http.Transport{
 				Proxy:                  nil,
