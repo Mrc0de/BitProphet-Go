@@ -116,8 +116,8 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	}
 	shaStr := hex.EncodeToString(h.Sum(nil))
 	// encode the result to base64
-	b64Signature := base64.StdEncoding.EncodeToString([]byte(shaStr))
-	req.Header.Set("CB-ACCESS-SIGN", b64Signature)
+	_ := base64.StdEncoding.EncodeToString([]byte(shaStr))
+	req.Header.Set("CB-ACCESS-SIGN", shaStr)
 
 	// Send
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
