@@ -97,7 +97,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	req.Header.Set("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
 	// Generate the signature
 	// decode Base64 secret
-	var sec []byte
+	sec := make([]byte, 64)
 	num, err := base64.StdEncoding.Decode(sec, []byte(s.Credentials.Secret))
 	if err != nil {
 		if logger != nil {
@@ -120,7 +120,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	if len(s.RequestBody) > 1 {
 		h.Write([]byte(s.RequestBody))
 	}
-	var sha []byte
+	sha := make([]byte, 64)
 	num = hex.Encode(sha, h.Sum(nil))
 	if logger != nil {
 		logger.Printf("[SecureRequest::Process] Encode Signature Length: %d", num)
