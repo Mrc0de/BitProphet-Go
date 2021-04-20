@@ -1,4 +1,4 @@
-module BitProphet-Go
+module github.com/mrc0de/BitProphet-Go
 
 go 1.14
 

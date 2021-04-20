@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
+	_ "github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
 	"html/template"
 	"io/ioutil"
 	"net"
