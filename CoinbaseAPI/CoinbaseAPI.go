@@ -36,29 +36,7 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 			Secret:     "",
 		},
 		Client: &http.Client{
-			Transport: &http.Transport{
-				Proxy:                  nil,
-				DialContext:            nil,
-				Dial:                   nil,
-				DialTLSContext:         nil,
-				DialTLS:                nil,
-				TLSClientConfig:        nil,
-				TLSHandshakeTimeout:    0,
-				DisableKeepAlives:      false,
-				DisableCompression:     false,
-				MaxIdleConns:           0,
-				MaxIdleConnsPerHost:    0,
-				MaxConnsPerHost:        0,
-				IdleConnTimeout:        0,
-				ResponseHeaderTimeout:  0,
-				ExpectContinueTimeout:  0,
-				TLSNextProto:           nil,
-				ProxyConnectHeader:     nil,
-				MaxResponseHeaderBytes: 0,
-				WriteBufferSize:        0,
-				ReadBufferSize:         0,
-				ForceAttemptHTTP2:      false,
-			},
+			Transport:     http.DefaultTransport,
 			CheckRedirect: nil,
 			Jar:           nil,
 			Timeout:       15 * time.Second,
@@ -145,6 +123,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	req.Header.Set("CB-ACCESS-SIGNATURE", b64Signature)
 
 	// Send
+	s.Client.Timeout = 20 * time.Second
 	resp, err := s.Client.Do(req)
 	if err != nil {
 		if logger != nil {
