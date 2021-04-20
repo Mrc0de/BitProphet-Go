@@ -10,7 +10,7 @@ require (
 	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab
 	github.com/influxdata/line-protocol v0.0.0-20210311194329-9aa0e372d097 // indirect
 	github.com/labstack/echo/v4 v4.2.2 // indirect
-	github.com/mrc0de/BitProphet-Go/CoinbaseAPI v0.0.0-20210420130354-d93dcd8a159b
+	github.com/mrc0de/BitProphet-Go/CoinbaseAPI v0.0.0-20210420140131-e2d2f4dbcee8
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
 	golang.org/x/net v0.0.0-20210410081132-afb366fc7cd1 // indirect
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
