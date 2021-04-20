@@ -76,7 +76,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 			debug.PrintStack()
 		}
 	}()
-	logger.Println("[SecureRequest::Process]")
+	fmt.Println("[SecureRequest::Process]")
 	var (
 		err error
 		req *http.Request
@@ -87,9 +87,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 		req, err = http.NewRequest(s.RequestMethod, "https://api.pro.coinbase.com"+s.Url, bytes.NewBuffer([]byte(s.RequestBody)))
 	}
 	if err != nil {
-		if logger != nil {
-			logger.Printf("[SecureRequest::Process] Error creating request: %s", err)
-		}
+		fmt.Printf("[SecureRequest::Process] Error creating request: %s", err)
 		return req, err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -99,11 +97,10 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	// Generate the signature
 	// decode Base64 secret
 	sec := make([]byte, 64)
+	fmt.Printf("Secret Len: %d", len(s.Credentials.Secret))
 	num, err := base64.StdEncoding.Decode(sec, []byte(s.Credentials.Secret))
 	if err != nil {
-		if logger != nil {
-			logger.Printf("Error decoding secret: %s", err)
-		}
+		fmt.Printf("Error decoding secret: %s", err)
 		return req, err
 	}
 	if logger != nil {
