@@ -178,6 +178,25 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	req.Credentials.Secret = Config.BPInternalAccount.Secret
 	resp, err := req.Process(logger) // process req
 
+	//c := &http.Client{}
+	//resp, err := c.Do(req)
+	//if err != nil {
+	//	if logger != nil {
+	//		logger.Printf("Error reading response: %s", err)
+	//	}
+	//	return reply, err
+	//}
+	//defer resp.Body.Close()
+	//
+	//reply, err = ioutil.ReadAll(resp.Body)
+	//if err != nil {
+	//	if logger != nil {
+	//		logger.Printf("Error reading body: %s", err)
+	//	}
+	//	return reply, err
+	//}
+	//return reply, err
+
 	logger.Printf("RESP: %v \t ------ \tE:\t %s", resp, err)
 	json.NewEncoder(w).Encode(resp)
 }

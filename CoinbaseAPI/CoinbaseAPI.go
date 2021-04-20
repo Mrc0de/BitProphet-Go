@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -68,11 +67,10 @@ func UrlForRequestName(name string) string {
 	}
 }
 
-func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
+func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	var (
-		err   error
-		req   *http.Request
-		reply []byte
+		err error
+		req *http.Request
 	)
 	if len(s.RequestBody) < 1 {
 		req, err = http.NewRequest(s.RequestMethod, "https://api.pro.coinbase.com"+s.Url, nil)
@@ -83,7 +81,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		if logger != nil {
 			logger.Printf("[SecureRequest::Process] Error creating request: %s", err)
 		}
-		return reply, err
+		return req, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("CB-ACCESS-KEY", s.Credentials.Key)
@@ -97,7 +95,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		if logger != nil {
 			logger.Printf("Error decoding secret: %s", err)
 		}
-		return reply, err
+		return req, err
 	}
 	if logger != nil {
 		logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", num)
@@ -126,23 +124,5 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 
 	// Send
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
-	c := &http.Client{}
-	c.Timeout = 20 * time.Second
-	resp, err := c.Do(req)
-	if err != nil {
-		if logger != nil {
-			logger.Printf("Error reading response: %s", err)
-		}
-		return reply, err
-	}
-	defer resp.Body.Close()
-
-	reply, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		if logger != nil {
-			logger.Printf("Error reading body: %s", err)
-		}
-		return reply, err
-	}
-	return reply, err
+	return req, nil
 }
