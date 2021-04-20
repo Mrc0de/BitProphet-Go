@@ -120,7 +120,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	shaStr := hex.EncodeToString(h.Sum(nil))
 	// encode the result to base64
 	b64Signature := base64.StdEncoding.EncodeToString([]byte(shaStr))
-	req.Header.Set("CB-ACCESS-SIGNATURE", b64Signature)
+	req.Header.Set("CB-ACCESS-SIGN", b64Signature)
 
 	// Send
 	s.Client.Timeout = 20 * time.Second
