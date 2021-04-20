@@ -48,9 +48,9 @@ func (s *Configuration) load(confFile string) error {
 	if len(s.BPInternalAccount.AccessKey) > 0 && len(s.BPInternalAccount.Secret) > 0 && len(s.BPInternalAccount.PassPhrase) > 0 {
 		s.BPInternalAccount.Enabled = true
 	}
-	logger.Printf("(\\.....\\......,/)")
-	logger.Printf(".\\(....|\\.....)/")
-	logger.Printf(".//\\...| \\.../\\\\")
+	logger.Printf("(\\.....\\.....,/)")
+	logger.Printf(".\\(....|\\....)/")
+	logger.Printf(".//\\...| \\../\\\\")
 	logger.Printf("(/./\\_#oo#_/\\.\\)")
 	logger.Printf(".\\/\\..####../\\/")
 	logger.Printf("......`##'......")
