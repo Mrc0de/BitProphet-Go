@@ -127,6 +127,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	req.Header.Set("CB-ACCESS-SIGN", b64Signature)
 
 	// Send
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
 	s.Client.Timeout = 20 * time.Second
 	resp, err := s.Client.Do(req)
 	if err != nil {
