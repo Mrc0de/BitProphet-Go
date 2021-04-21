@@ -108,7 +108,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
 	// write timestamp
-	logger.Printf("ENCODING: %s", fmt.Sprintf("%d", s.Timestamp.Unix())+s.RequestMethod+"https://api.pro.coinbase.com"+s.Url+s.RequestBody)
+	logger.Printf("ENCODING: %s", fmt.Sprintf("%d", s.Timestamp.Unix())+s.RequestMethod+s.Url+s.RequestBody)
 
 	h.Write([]byte(fmt.Sprintf("%d", s.Timestamp.Unix()) + s.RequestMethod + "https://api.pro.coinbase.com" + s.Url + s.RequestBody))
 	sha := make([]byte, hex.EncodedLen(h.Size()))
