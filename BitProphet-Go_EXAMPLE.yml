@@ -18,6 +18,8 @@ bpinternalaccount:
   accesskey: api_key
   secret: api_secret
   passphrase: api_passphrase
+  defaultcoins: ["LTC"]
+  nativecurrency: "USD"
 
 bpdata:
   host: ahost.com

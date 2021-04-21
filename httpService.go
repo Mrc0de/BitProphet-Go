@@ -198,6 +198,17 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		}{Error: "You broke something"})
 		return
 	}
-	logger.Printf("[InternalUserStats] List_Accounts Found %d Accounts", len(accList))
+
+	logger.Printf("[InternalUserStats] Found %d Accounts", len(accList))
+	var relevantAccounts []api.CoinbaseAccount
+	for _, coin := range Config.BPInternalAccount.DefaultCoins {
+		for _, acc := range accList {
+			if acc.Currency == coin {
+				relevantAccounts = append(relevantAccounts, acc)
+			}
+		}
+	}
+	logger.Printf("[InternalUserStats] Found %d Relevant Accounts", len(relevantAccounts))
+
 	w.WriteHeader(http.StatusOK)
 }

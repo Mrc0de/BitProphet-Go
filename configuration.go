@@ -29,10 +29,12 @@ type Configuration struct {
 		WSHost               string   `yaml:"wshost"`
 	} `yaml:"bitprophetserviceclient"`
 	BPInternalAccount struct { // Internal Demo account
-		Enabled    bool
-		AccessKey  string `yaml:"accesskey"`
-		Secret     string `yaml:"secret"`
-		PassPhrase string `yaml:"passphrase"`
+		Enabled        bool
+		AccessKey      string   `yaml:"accesskey"`
+		Secret         string   `yaml:"secret"`
+		PassPhrase     string   `yaml:"passphrase"`
+		DefaultCoins   []string `yaml:"defaultcoins"`
+		NativeCurrency string   `yaml:"nativecurrency"`
 	} `yaml:"bpinternalaccount"`
 	CBVersion string `yaml:"cbversion"`
 }
