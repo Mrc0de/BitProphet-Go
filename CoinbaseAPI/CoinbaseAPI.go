@@ -113,11 +113,10 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	//write method
 	h.Write([]byte(s.RequestMethod))
 	//write path
-	h.Write([]byte(s.Url))
+	h.Write([]byte("https://api.pro.coinbase.com" + s.Url))
 	//write body (if any)
-	if len(s.RequestBody) > 1 {
-		h.Write([]byte(s.RequestBody))
-	}
+	h.Write([]byte(s.RequestBody))
+
 	sha := make([]byte, hex.EncodedLen(h.Size()))
 	num = hex.Encode(sha, h.Sum(nil))
 	if logger != nil {
