@@ -6,6 +6,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab
-	github.com/mrc0de/BitProphet-Go/CoinbaseAPI v0.0.0-20210421010120-72b9e0cb262f
+	github.com/mrc0de/BitProphet-Go/CoinbaseAPI v0.0.0-20210421010717-8b57d0a3b66c
 	gopkg.in/yaml.v2 v2.4.0
 )
