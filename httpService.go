@@ -194,6 +194,6 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	logger.Printf("RESP: %s \t ------ \tE:\t %s", reply, err)
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(struct {
-		Error string `json:"error"`
-	}{Error: err.Error()}) // heard you liked oneliners bruh
+		Error error `json:"error"`
+	}{Error: err}) // heard you liked oneliners bruh
 }
