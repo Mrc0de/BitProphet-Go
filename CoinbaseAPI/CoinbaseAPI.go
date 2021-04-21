@@ -48,13 +48,13 @@ type CoinbaseCredentials struct {
 
 type CoinbaseAccount struct {
 	// PRIVATE! NEVER EXPOSE directly!
-	AccountID      string  `json:"id"`
-	Currency       string  `json:"currency"`
-	Balance        float64 `json:"balance"`
-	Available      float64 `json:"available"`
-	Hold           float64 `json:"hold"`
-	ProfileID      string  `json:"profile_id"`
-	TradingEnabled bool    `json:"trading_enabled"`
+	AccountID      string `json:"id"`
+	Currency       string `json:"currency"`
+	Balance        string `json:"balance"`
+	Available      string `json:"available"`
+	Hold           string `json:"hold"`
+	ProfileID      string `json:"profile_id"`
+	TradingEnabled bool   `json:"trading_enabled"`
 }
 
 func UrlForRequestName(name string) string {
