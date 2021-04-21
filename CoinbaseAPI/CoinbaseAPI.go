@@ -95,8 +95,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		return reply, err
 	}
 	s.Timestamp = time.Now().UTC()
-	// Header.Add/.Set will jack up your all-caps headers, because people are dumb and make overarching edicts about all us stupid people making arbitrary edicts (that, coincidentally, totally work)
-	// Bring forth a new muse, this one is all bloody.
+	// Header.Add/.Set will jack up your all-caps headers, set them directly, its just a map
 	req.Header["Accept"] = []string{"application/json"}
 	req.Header["CB-ACCESS-KEY"] = []string{s.Credentials.Key}
 	req.Header["CB-ACCESS-TIMESTAMP"] = []string{fmt.Sprintf("%d", s.Timestamp.Unix())}
