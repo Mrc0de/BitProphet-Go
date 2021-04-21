@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -110,7 +109,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	h := hmac.New(sha256.New, sec)
 	// write timestamp
 
-	h.Write([]byte(strconv.Itoa(int(s.Timestamp.Unix()))))
+	h.Write([]byte(fmt.Sprintf("%d", s.Timestamp.Unix())))
 	//write method
 	h.Write([]byte(s.RequestMethod))
 	//write path
