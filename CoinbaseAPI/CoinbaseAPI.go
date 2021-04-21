@@ -29,7 +29,7 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 		Url:           UrlForRequestName(RequestName),
 		RequestName:   RequestName,
 		RequestMethod: "GET", // default, change as needed
-		Timestamp:     time.Now(),
+		Timestamp:     time.Now().UTC(),
 		Credentials: &CoinbaseCredentials{
 			Key:        "",
 			Passphrase: "",
