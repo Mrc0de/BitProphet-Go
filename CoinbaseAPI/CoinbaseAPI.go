@@ -118,7 +118,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	if len(s.RequestBody) > 1 {
 		h.Write([]byte(s.RequestBody))
 	}
-	sha := make([]byte, 64)
+	sha := make([]byte, hex.EncodedLen(h.Size()))
 	num = hex.Encode(sha, h.Sum(nil))
 	if logger != nil {
 		logger.Printf("[SecureRequest::Process] Encoded Signature Length: %d", num)
@@ -127,10 +127,9 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	shaEnc := make([]byte, base64.StdEncoding.EncodedLen(len(sha)))
 	base64.StdEncoding.Encode(shaEnc, sha)
 	req.Header.Set("CB-ACCESS-SIGN", string(shaEnc))
-	for h, v := range req.Header {
-		logger.Printf("[%s] [%s]", h, v) // danger
-	}
-	// Send //
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
+	for h, v := range req.Header {
+		logger.Printf("[%s] %s", h, v) // danger
+	}
 	return req, nil
 }
