@@ -109,7 +109,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
 	// write timestamp
-	h.Write([]byte(strconv.FormatInt(s.Timestamp.Unix(), 10)))
+	h.Write([]byte(strconv.FormatInt(s.Timestamp.Unix(), 64)))
 	//write method
 	h.Write([]byte(s.RequestMethod))
 	//write path
