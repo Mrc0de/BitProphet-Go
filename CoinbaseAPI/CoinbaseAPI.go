@@ -127,7 +127,9 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	shaEnc := make([]byte, base64.StdEncoding.EncodedLen(len(sha)))
 	base64.StdEncoding.Encode(shaEnc, sha)
 	req.Header.Set("CB-ACCESS-SIGN", string(shaEnc))
-
+	for h, v := range req.Header {
+		logger.Printf("[%s] [%s]", h, v) // danger
+	}
 	// Send //
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
 	return req, nil
