@@ -259,7 +259,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		logger.Printf("[InternalUserStats] ----\t----\t----\t----")
 		AccountStats = append(AccountStats, stat)
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Header()["Content-Type"] = []string{"application/json"}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(AccountStats)
 }
