@@ -60,7 +60,7 @@ func UrlForRequestName(name string) string {
 	switch strings.ToLower(name) {
 	case "list_accounts":
 		{
-			return "/v2/accounts"
+			return "/accounts"
 		}
 	default:
 		{
