@@ -110,7 +110,12 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	logger.Printf("[SecureRequest::Process] Decoded Secret: %h", sec)
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
-	msg := fmt.Sprintf("%d%s%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
+	var msg string
+	if len(s.RequestBody) < 1 {
+		msg = fmt.Sprintf("%d%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url)
+	} else {
+		msg = fmt.Sprintf("%d%s%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
+	}
 	logger.Printf("ENCODING: %s", msg)
 
 	h.Write([]byte(msg))
