@@ -90,13 +90,14 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 		fmt.Printf("[SecureRequest::Process] Error creating request: %s", err)
 		return req, err
 	}
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Content-Type", "application/json")
+	s.Timestamp = time.Now().UTC()
+	req.Header["Accept"] = []string{"application/json"}
+	req.Header["CB-ACCESS-KEY"] = []string{s.Credentials.Key}
+	req.Header["CB-ACCESS-TIMESTAMP"] = []string{fmt.Sprintf("%d", s.Timestamp.Unix())}
+	req.Header["CB-ACCESS-PASSPHRASE"] = []string{s.Credentials.Passphrase}
+	req.Header["CB-VERSION"] = []string{s.CBVersion}
+	req.Header["Content-Type"] = []string{"application/json"}
 	req.Header.Add("User-Agent", "BitProphet-Go 1.337")
-	req.Header.Add("CB-ACCESS-KEY", s.Credentials.Key)
-	req.Header.Add("CB-ACCESS-TIMESTAMP", fmt.Sprintf("%d", s.Timestamp.Unix()))
-	req.Header.Add("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
-	req.Header.Add("CB-VERSION", s.CBVersion)
 	// Generate the signature
 	// decode Base64 secret
 	sec, err := base64.StdEncoding.DecodeString(s.Credentials.Secret)
@@ -106,7 +107,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	}
 	logger.Printf("[SecureRequest::Process] Base64 Secret: %s", s.Credentials.Secret)
 	logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", len(sec))
-	logger.Printf("[SecureRequest::Process] Decoded Secret: %x", sec)
+	logger.Printf("[SecureRequest::Process] Decoded Secret: %h", sec)
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
 	msg := fmt.Sprintf("%d%s%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
@@ -118,8 +119,8 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 
 	// encode the result to base64
 	shaEnc := base64.StdEncoding.EncodeToString(sha)
-	req.Header.Set("CB-ACCESS-SIGN", shaEnc)
-	//req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
+	req.Header["CB-ACCESS-SIGN"] = []string{shaEnc}
+
 	for h, v := range req.Header {
 		logger.Printf("[%s] %s", h, v) // danger
 	}
