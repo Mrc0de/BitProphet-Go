@@ -179,7 +179,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	req.Credentials.Secret = Config.BPInternalAccount.Secret
 	reply, err := req.Process(logger) // process request
 	if err != nil {
-		logger.Printf("[InternalUserStats] ERROR: %s", reply, err)
+		logger.Printf("[InternalUserStats] ERROR: %s", err)
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(struct {
@@ -190,7 +190,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	var accList []api.CoinbaseAccount
 	err = json.Unmarshal(reply, &accList)
 	if err != nil {
-		logger.Printf("[InternalUserStats] ERROR: %s", reply, err)
+		logger.Printf("[InternalUserStats] ERROR: %s", err)
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(struct {
