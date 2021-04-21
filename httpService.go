@@ -203,7 +203,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	var relevantAccounts []api.CoinbaseAccount
 	for _, coin := range Config.BPInternalAccount.DefaultCoins {
 		for _, acc := range accList {
-			if acc.Currency == coin {
+			if acc.Currency == coin || acc.Currency == Config.BPInternalAccount.NativeCurrency {
 				relevantAccounts = append(relevantAccounts, acc)
 			}
 		}
