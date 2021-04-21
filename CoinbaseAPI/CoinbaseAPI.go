@@ -108,6 +108,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
 	// write timestamp
+	logger.Printf("ENCODING: %s", fmt.Sprintf("%d", s.Timestamp.Unix())+s.RequestMethod+"https://api.pro.coinbase.com"+s.Url+s.RequestBody)
 
 	h.Write([]byte(fmt.Sprintf("%d", s.Timestamp.Unix()) + s.RequestMethod + "https://api.pro.coinbase.com" + s.Url + s.RequestBody))
 	sha := make([]byte, hex.EncodedLen(h.Size()))
@@ -116,8 +117,8 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 		logger.Printf("[SecureRequest::Process] Encoded Signature Length: %d", num)
 	}
 	// encode the result to base64
-	shaEnc := make([]byte, base64.StdEncoding.EncodedLen(len(sha)))
-	base64.StdEncoding.Encode(shaEnc, sha)
+	//shaEnc := make([]byte, base64.StdEncoding.EncodedLen(len(sha)))
+	shaEnc := base64.StdEncoding.EncodeToString(sha)
 	req.Header.Set("CB-ACCESS-SIGN", string(shaEnc))
 	//req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
 	for h, v := range req.Header {
