@@ -224,7 +224,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		logger.Printf("[InternalUserStats] [%d] Coin %s", z, a.Currency)
 		stat.Currency = a.Currency
 		if a.Currency == "USD" {
-			a.Balance = a.Balance[:strings.Index(a.Balance, ".")+2]
+			a.Balance = a.Balance[:strings.Index(a.Balance, ".")+3]
 		}
 		logger.Printf("[InternalUserStats] [%d] Balance: %s", z, a.Balance)
 		stat.Balance, err = strconv.ParseFloat(a.Balance, 64)
@@ -238,7 +238,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if a.Currency == "USD" {
-			a.Available = a.Available[:strings.Index(a.Available, ".")+2]
+			a.Available = a.Available[:strings.Index(a.Available, ".")+3]
 		}
 		logger.Printf("[InternalUserStats] [%d] Available: %s", z, a.Available)
 		stat.Available, err = strconv.ParseFloat(a.Available, 64)
@@ -252,7 +252,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if a.Currency == "USD" {
-			a.Hold = a.Hold[:strings.Index(a.Hold, ".")+2]
+			a.Hold = a.Hold[:strings.Index(a.Hold, ".")+3]
 		}
 		logger.Printf("[InternalUserStats] [%d] Held: %s", z, a.Hold)
 		stat.Hold, err = strconv.ParseFloat(a.Hold, 64)
