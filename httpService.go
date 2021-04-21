@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"runtime/debug"
+	"strconv"
 	"time"
 )
 
@@ -151,6 +152,13 @@ func processTimeout(h http.HandlerFunc, duration time.Duration) http.HandlerFunc
 //The method should be UPPER CASE.
 ////////////////////////////////////////////////////////////////
 
+type InternalUserStat struct {
+	Currency  string
+	Balance   float64
+	Available float64
+	Hold      float64
+}
+
 func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	// fetch stats for internal user
 	// /stats/user/default
@@ -209,13 +217,48 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	logger.Printf("[InternalUserStats] Found %d Relevant Accounts", len(relevantAccounts))
+	var AccountStats []InternalUserStat
 	for z, a := range relevantAccounts {
+		var stat InternalUserStat
 		logger.Printf("[InternalUserStats] [%d] Coin %s", z, a.Currency)
+		stat.Currency = a.Currency
 		logger.Printf("[InternalUserStats] [%d] Balance: %s", z, a.Balance)
+		stat.Balance, err = strconv.ParseFloat(a.Balance, 64)
+		if err != nil {
+			logger.Printf("[InternalUserStats] ERROR: %s", err)
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(struct {
+				Error string `json:"error"`
+			}{Error: "You broke something"})
+			return
+		}
 		logger.Printf("[InternalUserStats] [%d] Available: %s", z, a.Available)
+		stat.Available, err = strconv.ParseFloat(a.Available, 64)
+		if err != nil {
+			logger.Printf("[InternalUserStats] ERROR: %s", err)
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(struct {
+				Error string `json:"error"`
+			}{Error: "You broke something"})
+			return
+		}
 		logger.Printf("[InternalUserStats] [%d] Held: %s", z, a.Hold)
+		stat.Hold, err = strconv.ParseFloat(a.Hold, 64)
+		if err != nil {
+			logger.Printf("[InternalUserStats] ERROR: %s", err)
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(struct {
+				Error string `json:"error"`
+			}{Error: "You broke something"})
+			return
+		}
 		logger.Printf("[InternalUserStats] [%d] Enabled: %t", z, a.TradingEnabled)
 		logger.Printf("[InternalUserStats] ----\t----\t----\t----")
+		AccountStats = append(AccountStats, stat)
 	}
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(AccountStats)
 }
