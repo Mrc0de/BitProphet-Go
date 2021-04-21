@@ -104,6 +104,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	}
 	if logger != nil {
 		logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", num)
+		logger.Printf("[SecureRequest::Process] Decoded Secret: %s", sec)
 	}
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
