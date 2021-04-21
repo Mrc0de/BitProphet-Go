@@ -209,6 +209,13 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	logger.Printf("[InternalUserStats] Found %d Relevant Accounts", len(relevantAccounts))
-
+	for z, a := range relevantAccounts {
+		logger.Printf("[InternalUserStats] [%d] Coin %s", z, a.Currency)
+		logger.Printf("[InternalUserStats] [%d] Balance: %s", z, a.Balance)
+		logger.Printf("[InternalUserStats] [%d] Available: %s", z, a.Available)
+		logger.Printf("[InternalUserStats] [%d] Held: %s", z, a.Hold)
+		logger.Printf("[InternalUserStats] [%d] Enabled: %t", z, a.TradingEnabled)
+		logger.Printf("[InternalUserStats] ----\t----\t----\t----")
+	}
 	w.WriteHeader(http.StatusOK)
 }
