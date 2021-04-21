@@ -89,7 +89,9 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		req, err = http.NewRequest(s.RequestMethod, "https://api.pro.coinbase.com"+s.Url, bytes.NewBuffer([]byte(s.RequestBody)))
 	}
 	if err != nil {
-		fmt.Printf("[SecureRequest::Process] Error creating request: %s", err)
+		if logger != nil {
+			logger.Printf("[SecureRequest::Process] Error creating request: %s", err)
+		}
 		return reply, err
 	}
 	s.Timestamp = time.Now().UTC()
@@ -106,10 +108,12 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	// decode Base64 secret
 	sec, err := base64.StdEncoding.DecodeString(s.Credentials.Secret)
 	if err != nil {
-		fmt.Printf("Error decoding secret: %s", err)
+		if logger != nil {
+			logger.Printf("Error decoding secret: %s", err)
+		}
 		return reply, err
 	}
-	if err != nil {
+	if logger != nil {
 		//logger.Printf("[SecureRequest::Process] Base64 Secret: %s", s.Credentials.Secret)
 		logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", len(sec))
 		//logger.Printf("[SecureRequest::Process] Decoded Secret: %x", sec)
@@ -122,30 +126,36 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	} else {
 		msg = fmt.Sprintf("%d%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
 	}
-	if err != nil {
+	if logger != nil {
 		logger.Printf("[SecureRequest::Process] ENCODING MSG")
 	}
 	h.Write([]byte(msg))
 	sha := h.Sum(nil)
-	if err != nil {
+	if logger != nil {
 		logger.Printf("[SecureRequest::Process] Encoded Signature Size: %d", len(sha))
 	}
 	// encode the result to base64
 	shaEnc := base64.StdEncoding.EncodeToString(sha)
 	req.Header["CB-ACCESS-SIGN"] = []string{shaEnc}
-	if err != nil {
+	if logger != nil {
 		logger.Printf("[SecureRequest::Process] ENCODED MSG: %s", shaEnc)
 	}
 
 	c := &http.Client{}
 	re, err := c.Do(req)
 	if err != nil {
-		logger.Printf("[SecureRequest::Process] Error reading response: %s", err)
+		if logger != nil {
+			logger.Printf("[SecureRequest::Process] Error reading response: %s", err)
+		}
+		return reply, err
 	}
 	defer re.Body.Close()
 	reply, err = ioutil.ReadAll(re.Body)
 	if err != nil {
-		logger.Printf("[SecureRequest::Process] Error reading body: %s", err)
+		if logger != nil {
+			logger.Printf("[SecureRequest::Process] Error reading body: %s", err)
+		}
+		return reply, err
 	}
 	return reply, nil
 }

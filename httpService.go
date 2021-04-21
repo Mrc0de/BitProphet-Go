@@ -172,17 +172,32 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	// By default, this is the ONLY account that 'brags' but could be enabled on other users, if desired
 	// If this works well enough, I might never make other users muuuhahahahaha
 	///////////////////////////////////////////////////////////////////////////
-	logger.Printf("[PUBLIC]   [InternalUserStats]")
+	logger.Printf("[PUBLIC]   [InternalUserStats]   [PUBLIC]")
 	req := api.NewSecureRequest("list_accounts", Config.CBVersion) // create the req
 	req.Credentials.Key = Config.BPInternalAccount.AccessKey       // setup it's creds
 	req.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
 	req.Credentials.Secret = Config.BPInternalAccount.Secret
 	reply, err := req.Process(logger) // process request
-
-	logger.Printf("RESP: %s \t ------ E: %s", reply, err)
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(struct {
-		Error error `json:"error"`
-	}{Error: err})
+	if err != nil {
+		logger.Printf("[InternalUserStats] ERROR: %s", reply, err)
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(struct {
+			Error string `json:"error"`
+		}{Error: "You broke something"})
+		return
+	}
+	var accList []api.CoinbaseAccount
+	err = json.Unmarshal(reply, &accList)
+	if err != nil {
+		logger.Printf("[InternalUserStats] ERROR: %s", reply, err)
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(struct {
+			Error string `json:"error"`
+		}{Error: "You broke something"})
+		return
+	}
+	logger.Printf("[InternalUserStats] List_Accounts Found %d Accounts", len(accList))
+	w.WriteHeader(http.StatusOK)
 }
