@@ -14,6 +14,7 @@ import (
 	"os"
 	"runtime/debug"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -222,6 +223,9 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		var stat InternalUserStat
 		logger.Printf("[InternalUserStats] [%d] Coin %s", z, a.Currency)
 		stat.Currency = a.Currency
+		if a.Currency == "USD" {
+			a.Balance = a.Balance[:strings.LastIndex(a.Balance, ".")+2]
+		}
 		logger.Printf("[InternalUserStats] [%d] Balance: %s", z, a.Balance)
 		stat.Balance, err = strconv.ParseFloat(a.Balance, 64)
 		if err != nil {
@@ -233,6 +237,9 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 			}{Error: "You broke something"})
 			return
 		}
+		if a.Currency == "USD" {
+			a.Available = a.Available[:strings.LastIndex(a.Available, ".")+2]
+		}
 		logger.Printf("[InternalUserStats] [%d] Available: %s", z, a.Available)
 		stat.Available, err = strconv.ParseFloat(a.Available, 64)
 		if err != nil {
@@ -243,6 +250,9 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 				Error string `json:"error"`
 			}{Error: "You broke something"})
 			return
+		}
+		if a.Currency == "USD" {
+			a.Hold = a.Hold[:strings.LastIndex(a.Hold, ".")+2]
 		}
 		logger.Printf("[InternalUserStats] [%d] Held: %s", z, a.Hold)
 		stat.Hold, err = strconv.ParseFloat(a.Hold, 64)
