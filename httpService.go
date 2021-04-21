@@ -178,7 +178,6 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	req.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
 	req.Credentials.Secret = Config.BPInternalAccount.Secret
 	request, err := req.Process(logger) // process request
-	logger.Println("Exited PROCESS")
 	c := &http.Client{}
 	re, err := c.Do(request)
 	if err != nil {
