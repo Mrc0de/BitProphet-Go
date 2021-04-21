@@ -89,7 +89,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 		fmt.Printf("[SecureRequest::Process] Error creating request: %s", err)
 		return req, err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	//req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("CB-ACCESS-KEY", s.Credentials.Key)
 	req.Header.Set("CB-ACCESS-TIMESTAMP", fmt.Sprintf("%d", s.Timestamp.Unix()))
 	req.Header.Set("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
@@ -109,14 +109,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	h := hmac.New(sha256.New, sec)
 	// write timestamp
 
-	h.Write([]byte(fmt.Sprintf("%d", s.Timestamp.Unix())))
-	//write method
-	h.Write([]byte(s.RequestMethod))
-	//write path
-	h.Write([]byte("https://api.pro.coinbase.com" + s.Url))
-	//write body (if any)
-	h.Write([]byte(s.RequestBody))
-
+	h.Write([]byte(fmt.Sprintf("%d", s.Timestamp.Unix()) + s.RequestMethod + "https://api.pro.coinbase.com" + s.Url + s.RequestBody))
 	sha := make([]byte, hex.EncodedLen(h.Size()))
 	num = hex.Encode(sha, h.Sum(nil))
 	if logger != nil {
@@ -126,7 +119,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	shaEnc := make([]byte, base64.StdEncoding.EncodedLen(len(sha)))
 	base64.StdEncoding.Encode(shaEnc, sha)
 	req.Header.Set("CB-ACCESS-SIGN", string(shaEnc))
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
+	//req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
 	for h, v := range req.Header {
 		logger.Printf("[%s] %s", h, v) // danger
 	}
