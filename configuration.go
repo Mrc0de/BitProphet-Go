@@ -34,6 +34,7 @@ type Configuration struct {
 		Secret     string `yaml:"secret"`
 		PassPhrase string `yaml:"passphrase"`
 	} `yaml:"bpinternalaccount"`
+	CBVersion string `yaml:"cbversion"`
 }
 
 func (s *Configuration) load(confFile string) error {

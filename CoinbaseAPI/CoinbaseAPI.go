@@ -21,9 +21,10 @@ type SecureRequest struct {
 	RequestBody   string
 	Timestamp     time.Time
 	Credentials   *CoinbaseCredentials
+	CBVersion     string
 }
 
-func NewSecureRequest(RequestName string) *SecureRequest {
+func NewSecureRequest(RequestName string, version string) *SecureRequest {
 	return &SecureRequest{
 		Url:           UrlForRequestName(RequestName),
 		RequestName:   RequestName,
@@ -34,6 +35,7 @@ func NewSecureRequest(RequestName string) *SecureRequest {
 			Passphrase: "",
 			Secret:     "",
 		},
+		CBVersion: version,
 	}
 }
 
@@ -59,7 +61,7 @@ func UrlForRequestName(name string) string {
 	switch strings.ToLower(name) {
 	case "list_accounts":
 		{
-			return "/accounts"
+			return "/v2/accounts"
 		}
 	default:
 		{
@@ -93,6 +95,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	req.Header.Set("CB-ACCESS-KEY", s.Credentials.Key)
 	req.Header.Set("CB-ACCESS-TIMESTAMP", fmt.Sprintf("%d", s.Timestamp.Unix()))
 	req.Header.Set("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
+	req.Header.Set("CB-VERSION", s.CBVersion)
 	// Generate the signature
 	// decode Base64 secret
 	sec := make([]byte, base64.StdEncoding.DecodedLen(len([]byte(s.Credentials.Secret))))

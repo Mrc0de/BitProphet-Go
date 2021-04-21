@@ -173,8 +173,8 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	// If this works well enough, I might never make other users muuuhahahahaha
 	///////////////////////////////////////////////////////////////////////////
 	logger.Printf("[PUBLIC]   [InternalUserStats]")
-	req := api.NewSecureRequest("list_accounts")             // create the req
-	req.Credentials.Key = Config.BPInternalAccount.AccessKey // setup it's creds
+	req := api.NewSecureRequest("list_accounts", Config.CBVersion) // create the req
+	req.Credentials.Key = Config.BPInternalAccount.AccessKey       // setup it's creds
 	req.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
 	req.Credentials.Secret = Config.BPInternalAccount.Secret
 	request, err := req.Process(logger) // process request
