@@ -138,7 +138,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	shaEnc := base64.StdEncoding.EncodeToString(sha)
 	req.Header["CB-ACCESS-SIGN"] = []string{shaEnc}
 	if logger != nil {
-		logger.Printf("[SecureRequest::Process] ENCODED MSG: %s", shaEnc)
+		logger.Printf("[SecureRequest::Process] ENCODED MSG Size: %d", len(shaEnc))
 	}
 
 	c := &http.Client{}
