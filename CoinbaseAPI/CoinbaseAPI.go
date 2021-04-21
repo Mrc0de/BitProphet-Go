@@ -112,9 +112,9 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	h := hmac.New(sha256.New, sec)
 	var msg string
 	if len(s.RequestBody) < 1 {
-		msg = fmt.Sprintf("%d%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url)
+		msg = fmt.Sprintf("%d%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url)
 	} else {
-		msg = fmt.Sprintf("%d%s%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
+		msg = fmt.Sprintf("%d%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
 	}
 	logger.Printf("ENCODING: %s", msg)
 
