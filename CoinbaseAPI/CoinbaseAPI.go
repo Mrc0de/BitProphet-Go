@@ -91,7 +91,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("CB-ACCESS-KEY", s.Credentials.Key)
-	req.Header.Set("CB-ACCESS-TIMESTAMP", string(s.Timestamp.Unix()))
+	req.Header.Set("CB-ACCESS-TIMESTAMP", fmt.Sprintf("%d", s.Timestamp.Unix()))
 	req.Header.Set("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
 	// Generate the signature
 	// decode Base64 secret
