@@ -95,7 +95,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	req.Header.Set("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
 	// Generate the signature
 	// decode Base64 secret
-	sec := make([]byte, base64.StdEncoding.DecodedLen(len(s.Credentials.Secret)))
+	sec := make([]byte, base64.StdEncoding.DecodedLen(len([]byte(s.Credentials.Secret))))
 	logger.Printf("Secret: %s", s.Credentials.Secret)
 	num, err := base64.StdEncoding.Decode(sec, []byte(s.Credentials.Secret))
 	if err != nil {
@@ -104,7 +104,7 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 	}
 	if logger != nil {
 		logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", num)
-		logger.Printf("[SecureRequest::Process] Decoded Secret Key: %s", sec)
+		logger.Printf("[SecureRequest::Process] Decoded Secret Key: %b", sec)
 	}
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
