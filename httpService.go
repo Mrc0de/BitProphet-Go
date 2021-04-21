@@ -260,6 +260,6 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		AccountStats = append(AccountStats, stat)
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Content-Type", "application/json")
+	w.Header()["Content-Type"] = []string{"application/json"}
 	json.NewEncoder(w).Encode(AccountStats)
 }
