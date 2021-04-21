@@ -190,10 +190,10 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		logger.Printf("Error reading body: %s", err)
 	}
 
-	logger.Printf("RESP: %s \t ------ \tE:\t %s", reply, err)
-	w.WriteHeader(200)
+	logger.Printf("RESP: %s \t ------ E: %s", reply, err)
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(struct {
 		Error error `json:"error"`
-	}{Error: err}) // heard you liked oneliners bruh
+	}{Error: err})
 }

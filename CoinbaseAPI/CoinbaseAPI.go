@@ -5,7 +5,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"net/http"
@@ -91,40 +90,35 @@ func (s *SecureRequest) Process(logger *log.Logger) (*http.Request, error) {
 		fmt.Printf("[SecureRequest::Process] Error creating request: %s", err)
 		return req, err
 	}
-	//req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("CB-ACCESS-KEY", s.Credentials.Key)
-	req.Header.Set("CB-ACCESS-TIMESTAMP", fmt.Sprintf("%d", s.Timestamp.Unix()))
-	req.Header.Set("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
-	req.Header.Set("CB-VERSION", s.CBVersion)
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "BitProphet-Go 1.337")
+	req.Header.Add("CB-ACCESS-KEY", s.Credentials.Key)
+	req.Header.Add("CB-ACCESS-TIMESTAMP", fmt.Sprintf("%d", s.Timestamp.Unix()))
+	req.Header.Add("CB-ACCESS-PASSPHRASE", s.Credentials.Passphrase)
+	req.Header.Add("CB-VERSION", s.CBVersion)
 	// Generate the signature
 	// decode Base64 secret
-	sec := make([]byte, base64.StdEncoding.DecodedLen(len([]byte(s.Credentials.Secret))))
-	logger.Printf("Secret: %s", s.Credentials.Secret)
-	num, err := base64.StdEncoding.Decode(sec, []byte(s.Credentials.Secret))
+	sec, err := base64.StdEncoding.DecodeString(s.Credentials.Secret)
 	if err != nil {
 		fmt.Printf("Error decoding secret: %s", err)
 		return req, err
 	}
-	if logger != nil {
-		logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", num)
-		logger.Printf("[SecureRequest::Process] Decoded Secret Key: %b", sec)
-	}
+	logger.Printf("[SecureRequest::Process] Base64 Secret: %s", s.Credentials.Secret)
+	logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", len(sec))
+	logger.Printf("[SecureRequest::Process] Decoded Secret: %x", sec)
 	// Create SHA256 HMAC w/ secret
 	h := hmac.New(sha256.New, sec)
-	// write timestamp
-	logger.Printf("ENCODING: %s", fmt.Sprintf("%d", s.Timestamp.Unix())+s.RequestMethod+s.Url+s.RequestBody)
+	msg := fmt.Sprintf("%d%s%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
+	logger.Printf("ENCODING: %s", msg)
 
-	h.Write([]byte(fmt.Sprintf("%d", s.Timestamp.Unix()) + s.RequestMethod + s.Url + s.RequestBody))
-	sha := make([]byte, hex.EncodedLen(h.Size()))
-	num = hex.Encode(sha, h.Sum(nil))
-	if logger != nil {
-		logger.Printf("[SecureRequest::Process] Encoded Signature Length: %d", num)
-	}
+	h.Write([]byte(msg))
+	sha := h.Sum(nil)
+	logger.Printf("[SecureRequest::Process] Encoded Signature Size: %d", len(sha))
+
 	// encode the result to base64
-	shaEnc := make([]byte, base64.StdEncoding.EncodedLen(len(sha)))
-	base64.StdEncoding.Encode(shaEnc, sha)
-
-	req.Header.Set("CB-ACCESS-SIGN", fmt.Sprintf("%s", shaEnc))
+	shaEnc := base64.StdEncoding.EncodeToString(sha)
+	req.Header.Set("CB-ACCESS-SIGN", shaEnc)
 	//req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux i686; rv:10.0) Gecko/20100101 Firefox/10.0")
 	for h, v := range req.Header {
 		logger.Printf("[%s] %s", h, v) // danger
