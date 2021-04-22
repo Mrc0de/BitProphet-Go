@@ -284,7 +284,19 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		}{Error: "You broke something"})
 		return
 	}
-	logger.Printf("replyOrders: %v", replyOrders)
+	logger.Printf("replyOrders: %s", replyOrders)
+	var orderList []api.CoinbaseOrder
+	err = json.Unmarshal(reply, &orderList)
+	if err != nil {
+		logger.Printf("[InternalUserStats] ERROR: %s", err)
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(struct {
+			Error string `json:"error"`
+		}{Error: "You broke something"})
+		return
+	}
+	logger.Printf("[InternalUserStats] Orders Found: %d", len(orderList))
 
 	w.Header()["Content-Type"] = []string{"application/json"}
 	w.WriteHeader(http.StatusOK)
