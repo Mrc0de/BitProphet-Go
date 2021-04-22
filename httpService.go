@@ -286,7 +286,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Printf("replyOrders: %s", replyOrders)
 	var orderList []api.CoinbaseOrder
-	err = json.Unmarshal(reply, &orderList)
+	err = json.Unmarshal(replyOrders, &orderList)
 	if err != nil {
 		logger.Printf("[InternalUserStats] ERROR: %s", err)
 		w.Header().Add("Content-Type", "application/json")
