@@ -274,7 +274,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 	reqOrders.Credentials.Key = Config.BPInternalAccount.AccessKey     // setup it's creds
 	reqOrders.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
 	reqOrders.Credentials.Secret = Config.BPInternalAccount.Secret
-	replyOrders, err := req.Process(logger) // process request
+	replyOrders, err := reqOrders.Process(logger) // process request
 	if err != nil {
 		logger.Printf("[InternalUserStats] ERROR: %s", err)
 		w.Header().Add("Content-Type", "application/json")
