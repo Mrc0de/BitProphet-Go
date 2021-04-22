@@ -269,6 +269,23 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		logger.Printf("[InternalUserStats] ----\t----\t----\t----")
 		AccountStats = append(AccountStats, stat)
 	}
+	// Stats done, get orders
+	reqOrders := api.NewSecureRequest("list_orders", Config.CBVersion) // create the req
+	reqOrders.Credentials.Key = Config.BPInternalAccount.AccessKey     // setup it's creds
+	reqOrders.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
+	reqOrders.Credentials.Secret = Config.BPInternalAccount.Secret
+	replyOrders, err := req.Process(logger) // process request
+	if err != nil {
+		logger.Printf("[InternalUserStats] ERROR: %s", err)
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(struct {
+			Error string `json:"error"`
+		}{Error: "You broke something"})
+		return
+	}
+	logger.Printf("replyOrders: %v", replyOrders)
+
 	w.Header()["Content-Type"] = []string{"application/json"}
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(AccountStats)
