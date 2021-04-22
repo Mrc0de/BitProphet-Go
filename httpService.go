@@ -158,6 +158,24 @@ type InternalUserStat struct {
 	Balance   float64
 	Available float64
 	Hold      float64
+	Orders    []InternalUserOrder
+}
+
+type InternalUserOrder struct {
+	Price         string    `json:"price"`
+	Size          string    `json:"size"`
+	ProductId     string    `json:"product_id"`
+	Side          string    `json:"side"`
+	Stp           string    `json:"stp"`
+	Type          string    `json:"type"`
+	TimeInForce   string    `json:"time_in_force"`
+	PostOnly      bool      `json:"post_only"`
+	CreatedAt     time.Time `json:"created_at"`
+	FillFees      string    `json:"fill_fees"`
+	FilledSize    string    `json:"filled_size"`
+	ExecutedValue string    `json:"executed_value"`
+	Status        string    `json:"status"`
+	Settled       bool      `json:"settled"`
 }
 
 func InternalUserStats(w http.ResponseWriter, r *http.Request) {
@@ -284,8 +302,8 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		}{Error: "You broke something"})
 		return
 	}
-	logger.Printf("replyOrders: %s", replyOrders)
-	var orderList []api.CoinbaseOrder
+	//logger.Printf("replyOrders: %s", replyOrders)
+	var orderList []InternalUserOrder
 	err = json.Unmarshal(replyOrders, &orderList)
 	if err != nil {
 		logger.Printf("[InternalUserStats] ERROR: %s", err)
@@ -297,8 +315,13 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Printf("[InternalUserStats] Orders Found: %d", len(orderList))
-
+	var stats struct {
+		Accounts []InternalUserStat
+		Orders   []InternalUserOrder
+	}
+	stats.Accounts = AccountStats
+	stats.Orders = orderList
 	w.Header()["Content-Type"] = []string{"application/json"}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(AccountStats)
+	json.NewEncoder(w).Encode(stats)
 }
