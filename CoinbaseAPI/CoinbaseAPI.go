@@ -76,6 +76,20 @@ type CoinbaseOrder struct {
 	Settled       bool      `json:"settled"`
 }
 
+type CoinbaseFill struct {
+	// dont expose the private parts
+	TradeId   int       `json:"trade_id"`
+	ProductId string    `json:"product_id"`
+	Price     string    `json:"price"`
+	Size      string    `json:"size"`
+	OrderId   string    `json:"order_id"`
+	CreatedAt time.Time `json:"created_at"`
+	Liquidity string    `json:"liquidity"`
+	Fee       string    `json:"fee"`
+	Settled   bool      `json:"settled"`
+	Side      string    `json:"side"`
+}
+
 func UrlForRequestName(name string) string {
 	switch strings.ToLower(name) {
 	case "list_accounts":
@@ -85,6 +99,10 @@ func UrlForRequestName(name string) string {
 	case "list_orders":
 		{
 			return "/orders"
+		}
+	case "list_fills":
+		{
+			return "/fills"
 		}
 	default:
 		{

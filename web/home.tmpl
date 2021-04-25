@@ -82,7 +82,7 @@
             <div id="bpTitleBar" class="col">
                 BitProphet-Go
             </div>
-            <textarea id="debugOut" class="col-12" readonly aria-readonly="true"></textarea>
+            <textarea id="debugOut" class="col-sm-12 col-md-6" readonly aria-readonly="true"></textarea>
         </div>
     </div>
 </div>
@@ -90,7 +90,6 @@
 
 
 <script>
-    {{/* Connect to Me! */}}
     let ws = new WebSocket('wss://' + {{.WsHost}} +"/ws");
     // also Coinbase.... Public
     let coinbasePublicWSS = new WebSocket('wss://ws-feed.pro.coinbase.com');
@@ -99,7 +98,7 @@
         $("#debugOut").text($("#debugOut").text().trim() + "\r\n" + msg);
     }
 
-    dbg("[Debug Stream] Connecting...");
+    dbg("[BitProphet-Go] Connecting...");
     wsSetup(ws);
     wsCBPublicSetup(coinbasePublicWSS);
     /////////
@@ -263,7 +262,7 @@
     function wsSetup(sock) {
         // Websocket Setup
         sock.addEventListener('open', function (event) {
-            dbg("Connected!");
+            dbg("Connected to geekprojex.com");
         });
         sock.addEventListener('message', function (event) {
             dbg('Message from server ' + event.data.trim());
@@ -290,7 +289,7 @@
     function wsCBPublicSetup(sock) {
         // Websocket Setup
         sock.addEventListener('open', function (event) {
-            dbg("Connected To Coinbase Pro WS Feed [Live]");
+            dbg("Connected To Coinbase.com Pro Feed");
             // subscribe our three primary tickers
             sock.send(JSON.stringify({
                 "type": "subscribe",
