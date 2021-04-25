@@ -36,7 +36,7 @@
 
         #debugOut {
             padding: 0;
-            height: 20vh;
+            height: 40vh;
             background-color: black;
             color: greenyellow;
             background-blend-mode: color-burn;
@@ -87,35 +87,37 @@
             <div id="bpTitleBar" class="col">
                 BitProphet-Go
             </div>
-            <textarea id="debugOut" class="col-sm-12 col-md-4" readonly aria-readonly="true"></textarea>
-            <div id="systemOrders" class="col-sm-12 col-md-4">
-                <table id="systemOrdersTable">
-                    <thead>
-                        <tr><th>Market</th>
-                            <th>Price</th>
-                            <th>Size</th>
-                            <th>Side</th>
-                            <th>Type</th>
-                            <th>FillFees</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Settled</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-if="InternalUserOrderStats != null" v-for="o in InternalUserOrderStats">
-                            <td></td>
-                            <td>o.price</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="row">
+                <textarea id="debugOut" class="col-sm-12 col-md-4" readonly aria-readonly="true"></textarea>
+                <div id="systemOrders" class="col-sm-12 col-md-8">
+                    <table id="systemOrdersTable" class="table table-sm table-striped text-light">
+                        <thead>
+                            <tr><th>Market</th>
+                                <th>Price</th>
+                                <th>Size</th>
+                                <th>Side</th>
+                                <th>Type</th>
+                                <th>FillFees</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Settled</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="InternalUserOrderStats != null" v-for="o in InternalUserOrderStats">
+                                <td>[[o.product_id]]</td>
+                                <td>$[[o.price]]</td>
+                                <td>[[o.size]]</td>
+                                <td>[[o.side]]</td>
+                                <td>[[o.type]]</td>
+                                <td>[[o.fill_fees]]</td>
+                                <td>[[o.status]]</td>
+                                <td>[[o.created_at]]</td>
+                                <td>[[o.settled]]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
