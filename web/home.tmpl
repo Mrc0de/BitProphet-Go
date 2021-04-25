@@ -141,7 +141,14 @@
             InternalUserOrderStats: null,
         },
         methods:{
-
+            refresh(){
+                axios.get('/stats/user/default',
+                ).then((r)=>{
+                    orderV.InternalUserOrderStats = r.data.Orders;
+                }).catch((e)=>{
+                    console.log(e);
+                });
+            },
         },
         mounted(){
             axios.get('/stats/user/default',
@@ -150,6 +157,7 @@
             }).catch((e)=>{
                 console.log(e);
             });
+            setInterval(orderV.refresh,60000)
         },
         delimiters: ['[[', ']]'],
     })
