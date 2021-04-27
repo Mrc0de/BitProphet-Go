@@ -176,8 +176,10 @@ func (b *bpService) Run() {
 			EventType: "INTERNAL",
 			EventData: "BitProphet Internal Account Client Enabled!",
 		}
-
 	}
+	// Bot startup
+	go b.TheBot.Run()
+
 	for {
 		select {
 		case event := <-b.TheBot.ServiceChannel:
