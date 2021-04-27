@@ -90,6 +90,20 @@ type CoinbaseFill struct {
 	Side      string    `json:"side"`
 }
 
+type CoinbaseReport struct {
+	Id          string    `json:"id"`
+	Type        string    `json:"type"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	CompletedAt time.Time `json:"completed_at"`
+	ExpiresAt   time.Time `json:"expires_at"`
+	FileUrl     string    `json:"file_url"`
+	Params      struct {
+		StartDate time.Time `json:"start_date"`
+		EndDate   time.Time `json:"end_date"`
+	} `json:"params"`
+}
+
 func UrlForRequestName(name string) string {
 	switch strings.ToLower(name) {
 	case "list_accounts":
@@ -103,6 +117,14 @@ func UrlForRequestName(name string) string {
 	case "list_fills":
 		{
 			return "/fills"
+		}
+	case "report_create":
+		{
+			return "/reports" // returns an id
+		}
+	case "report_fetch":
+		{
+			return "/reports/:" // :reportid <-- supply this part
 		}
 	default:
 		{
