@@ -91,7 +91,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		}{Error: "You broke something"})
 		return
 	}
-	logger.Printf("REPLY: %s", reply)
+	//logger.Printf("REPLY: %s", reply)
 	var accList []api.CoinbaseAccount
 	err = json.Unmarshal(reply, &accList)
 	if err != nil {
