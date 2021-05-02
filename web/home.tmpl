@@ -97,10 +97,8 @@
                                 <th>Size</th>
                                 <th>Side</th>
                                 <th>Type</th>
-                                <th>FillFees</th>
                                 <th>Status</th>
                                 <th>Created</th>
-                                <th>Settled</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,13 +108,31 @@
                                 <td>[[o.size]]</td>
                                 <td>[[o.side]]</td>
                                 <td>[[o.type]]</td>
-                                <td>[[o.fill_fees]]</td>
                                 <td>[[o.status]]</td>
                                 <td>[[o.created_at]]</td>
-                                <td>[[o.settled]]</td>
                             </tr>
                         </tbody>
                     </table>
+                    <div id="systemAccBal" class="col-sm-12 col-md-12">
+                        <table id="systemAccBalTable" class="table table-sm table-striped text-light">
+                            <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Total</th>
+                                <th>Available</th>
+                                <th>Held</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-if="InternalUserAccs != null" v-for="a in InternalUserAccs">
+                                <td>[[a.Currency]]</td>
+                                <td>[[a.Balance]]</td>
+                                <td>[[a.Available]]</td>
+                                <td>[[a.Hold]]</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -139,12 +155,14 @@
         el: '#systemOrders',
         data: {
             InternalUserOrderStats: null,
+            InternalUserAccs: null,
         },
         methods:{
             refresh(){
                 axios.get('/stats/user/default',
                 ).then((r)=>{
                     orderV.InternalUserOrderStats = r.data.Orders;
+                    orderV.InternalUserAccs = r.data.Accounts;
                 }).catch((e)=>{
                     console.log(e);
                 });
@@ -154,6 +172,7 @@
             axios.get('/stats/user/default',
             ).then((r)=>{
                 this.InternalUserOrderStats = r.data.Orders;
+                this.InternalUserAccs = r.data.Accounts;
             }).catch((e)=>{
                 console.log(e);
             });
