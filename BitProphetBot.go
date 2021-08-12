@@ -117,7 +117,9 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		logger.Printf("[AutoSuggest] Will Spend: $%.2f", willSpend)
 		// What is the BuyPoint FEE? determine willSpendWithBuyFee...
-
+		buyFee := (Config.BotDefaults.FeePercent * 0.01) * willSpend
+		willSpendWithBuyFee := willSpend + buyFee
+		logger.Printf("[AutoSuggest] Fee: $%.2f \tTotal: $%.2f", buyFee, willSpendWithBuyFee)
 		// how much coin for that much @ current price?
 
 		// but SHOULD we buy now at current price?
