@@ -69,7 +69,6 @@ func (b *BitProphetBot) AutoSuggest() {
 		logger.Printf("[AutoSuggest] ERROR: %s", err)
 		return
 	}
-	logger.Printf("[AutoSuggest] Found %d Accounts", len(accList))
 	var NativeAcc api.CoinbaseAccount
 	for _, acc := range accList {
 		if acc.Currency == Config.BPInternalAccount.NativeCurrency {
@@ -100,12 +99,12 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		if availCash < minPriceBuy {
 			logger.Printf("[AutoSuggest] Not Enough Available %s, Aborting.", NativeAcc.Currency)
-			return
+			continue
 		}
 		logger.Printf("[AutoSuggest] MaxBuy: $%.2f", Config.BotDefaults.MaxUSDBuy)
 		if minPriceBuy > Config.BotDefaults.MaxUSDBuy {
 			logger.Printf("[AutoSuggest] MinPrice is more than MaxBuy, Aborting.")
-			return
+			continue
 		}
 		// We have enough to minimum buy....
 		// but instead we will buy UP TO maxBuy OR just min...
@@ -117,6 +116,11 @@ func (b *BitProphetBot) AutoSuggest() {
 			willSpend = Config.BotDefaults.MaxUSDBuy
 		}
 		logger.Printf("[AutoSuggest] Will Spend: $%.2f", willSpend)
+		// What is the BuyPoint FEE? determine willSpendWithBuyFee...
+
+		// how much coin for that much @ current price?
+
+		// but SHOULD we buy now at current price?
 		logger.Printf("[AutoSuggest] Analyzing Price History for %s", m)
 	}
 
