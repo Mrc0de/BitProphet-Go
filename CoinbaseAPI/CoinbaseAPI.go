@@ -180,7 +180,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		//logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", len(sec))
 		//logger.Printf("[SecureRequest::Process] Decoded Secret: %x", sec)
 	}
-	// Create SHA256 HMAC w/ secret
+	// Create SHA256 HMAC w/ secret //
 	h := hmac.New(sha256.New, sec)
 	var msg string
 	if len(s.RequestBody) < 1 {
