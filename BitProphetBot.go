@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	api "github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -74,6 +76,12 @@ func (b *BitProphetBot) AutoSuggest() {
 			NativeAcc = acc
 		}
 	}
+	if strings.Contains(NativeAcc.Balance, ".") {
+		NativeAcc.Balance = NativeAcc.Balance[:strings.Index(NativeAcc.Balance, ".")+3]
+	}
+	if strings.Contains(NativeAcc.Available, ".") {
+		NativeAcc.Available = NativeAcc.Available[:strings.Index(NativeAcc.Available, ".")+3]
+	}
 	logger.Printf("[AutoSuggest] Found [%s] Account Total: $%s Available: $%s", NativeAcc.Currency, NativeAcc.Balance, NativeAcc.Available)
 	// Now we know our hard limit for spending (our native currency's available balance)
 	// Config.BotDefaults.MinCryptoBuy * CoinPrice = Minimum Spend Amount BEFORE FEES
@@ -81,12 +89,23 @@ func (b *BitProphetBot) AutoSuggest() {
 	for _, m := range Config.BotDefaults.Markets {
 		coinAsk := b.ParentService.CoinPricesNow[m].Ask
 		minPriceBuy := coinAsk * Config.BotDefaults.MinCryptoBuy
+		logger.Printf("[AutoSuggest] Available [%s] [$%s]", NativeAcc.Currency, NativeAcc.Available)
 		logger.Printf("[AutoSuggest] Price [%s] [$%.2f]", m, coinAsk)
 		logger.Printf("[AutoSuggest] MinCryptoBuy(0.1) * $%.2f = $%.2f", coinAsk, minPriceBuy)
+		availCash, err := strconv.ParseFloat(NativeAcc.Available, 32)
+		if err != nil {
+			logger.Printf("[AutoSuggest] ERROR: %s", err)
+		}
+		if availCash < minPriceBuy {
+			logger.Printf("[AutoSuggest] Not Enough Available %s, Aborting.", NativeAcc.Currency)
+			return
+		}
+		logger.Printf("[AutoSuggest] Analyzing Price History for %s", m)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
 	// choose hour range (was 8 hours)
+	// use influx instead of this.....
 
 	//QString highPrice = findHighestValue(lastPriceRange);
 	//QString highAsk = findHighestValue(askRange);
