@@ -121,7 +121,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		willSpendWithBuyFee := willSpend + buyFee
 		logger.Printf("[AutoSuggest] Fee: $%.2f \tTotal: $%.2f", buyFee, willSpendWithBuyFee)
 		// how much coin for that much @ current price?
-		willBuyCoinAmount := willSpend * coinAsk
+		willBuyCoinAmount := willSpend / coinAsk
 		if willSpendWithBuyFee > availCash {
 			logger.Printf("[AutoSuggest] Available Balance less than $%.2f, Aborting.", willSpendWithBuyFee)
 			continue
