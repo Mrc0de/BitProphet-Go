@@ -57,7 +57,7 @@ func CreateBPService() *bpService {
 		Client:           SpawnBitProphetClient(),
 		ServiceClients:   make([]*BitProphetServiceClient, 0),
 		TheBot:           CreateBitProphetBot(),
-		ReportingChannel: make(chan *bpServiceEvent, 10),
+		ReportingChannel: make(chan *bpServiceEvent, 10), // this makes it into the webservice log
 		CommandChannel:   make(chan *bpServiceCommandMsg, 0),
 		CoinbaseChannel:  make(chan *bpCoinBaseMsg, 0),
 		Quit:             false,
@@ -142,13 +142,14 @@ type bpCBSubscribeRequest struct {
 	// The ConnectCoinbase() code makes the handling more obvious (to me)
 }
 
-// Misc Types for MSGs
-type bpCBPrice struct {
-	Market string
-	Bid    float64
-	Ask    float64
-	Last   float64
-}
+//
+//// Misc Types for MSGs
+//type bpCBPrice struct {
+//	Market string
+//	Bid    float64
+//	Ask    float64
+//	Last   float64
+//}
 
 // ////////////////////////// //
 // BitProphet Service Method //
@@ -185,6 +186,15 @@ func (b *bpService) Run() {
 		case event := <-b.TheBot.ServiceChannel:
 			{
 				b.ReportingChannel <- event
+			}
+		case sug := <-b.TheBot.AutoSuggestChannel:
+			{
+				// handle AutoSuggest Events
+				b.ReportingChannel <- &bpServiceEvent{
+					Time:      time.Now(),
+					EventType: "INTERNAL",
+					EventData: fmt.Sprintf("Bot made a suggestion: %s %s", sug.EventType, sug.EventData),
+				}
 			}
 		case cmd := <-b.CommandChannel:
 			{
@@ -297,7 +307,7 @@ func (b *BitProphetServiceClient) ConnectCoinbase() error {
 
 func (b *BitProphetServiceClient) ReadPump() {
 	defer func() {
-		b.WSConn.Close()
+		_ = b.WSConn.Close()
 		b.Connected = false
 		b.ParentService.ReportingChannel <- &bpServiceEvent{
 			Time:      time.Now(),
@@ -345,7 +355,7 @@ func (b *BitProphetServiceClient) ReadPump() {
 
 func (b *BitProphetServiceClient) WritePump() {
 	defer func() {
-		b.WSConn.Close()
+		_ = b.WSConn.Close()
 		b.Connected = false
 		b.ParentService.ReportingChannel <- &bpServiceEvent{
 			Time:      time.Now(),
