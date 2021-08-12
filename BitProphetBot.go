@@ -123,8 +123,15 @@ func (b *BitProphetBot) AutoSuggest() {
 		// how much coin for that much @ current price?
 		willBuyCoinAmount := willSpend / coinAsk
 		if willSpendWithBuyFee > availCash {
-			logger.Printf("[AutoSuggest] Available Balance less than $%.2f, Aborting.", willSpendWithBuyFee)
-			continue
+			logger.Printf("[AutoSuggest] Available Balance less than $%.2f, Reverting to $%.2f", willSpendWithBuyFee, minPriceBuy)
+			willSpend = minPriceBuy
+			buyFee = (Config.BotDefaults.FeePercent * 0.01) * willSpend
+			willSpendWithBuyFee = willSpend + buyFee
+			logger.Printf("[AutoSuggest] Fee: $%.2f \tTotal: $%.2f", buyFee, willSpendWithBuyFee)
+			if willSpendWithBuyFee > availCash {
+				logger.Printf("[AutoSuggest] Available Balance less than $%.2f, Aborting.", willSpendWithBuyFee)
+				continue
+			}
 		}
 		logger.Printf("[AutoSuggest] Coin Amount: %.8f @ Price: $%.2f For $%.2f ( w/Fee: $%.2f )", willBuyCoinAmount, coinAsk, willSpend, willSpendWithBuyFee)
 		// but SHOULD we buy now at current price?
