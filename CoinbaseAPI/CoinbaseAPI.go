@@ -177,7 +177,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	}
 	if logger != nil {
 		//logger.Printf("[SecureRequest::Process] Base64 Secret: %s", s.Credentials.Secret)
-		logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", len(sec))
+		//logger.Printf("[SecureRequest::Process] Decoded Secret Length: %d", len(sec))
 		//logger.Printf("[SecureRequest::Process] Decoded Secret: %x", sec)
 	}
 	// Create SHA256 HMAC w/ secret
@@ -189,18 +189,18 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 		msg = fmt.Sprintf("%d%s%s%s", s.Timestamp.Unix(), s.RequestMethod, s.Url, s.RequestBody)
 	}
 	if logger != nil {
-		logger.Printf("[SecureRequest::Process] ENCODING MSG")
+		//logger.Printf("[SecureRequest::Process] ENCODING MSG")
 	}
 	h.Write([]byte(msg))
 	sha := h.Sum(nil)
 	if logger != nil {
-		logger.Printf("[SecureRequest::Process] Encoded Signature Size: %d", len(sha))
+		//logger.Printf("[SecureRequest::Process] Encoded Signature Size: %d", len(sha))
 	}
 	// encode the result to base64
 	shaEnc := base64.StdEncoding.EncodeToString(sha)
 	req.Header["CB-ACCESS-SIGN"] = []string{shaEnc}
 	if logger != nil {
-		logger.Printf("[SecureRequest::Process] ENCODED MSG Size: %d", len(shaEnc))
+		//logger.Printf("[SecureRequest::Process] ENCODED MSG Size: %d", len(shaEnc))
 	}
 
 	c := &http.Client{}

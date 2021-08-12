@@ -9,6 +9,7 @@ import (
 type BitProphetBot struct {
 	ServiceChannel     chan *bpServiceEvent
 	AutoSuggestChannel chan *bpServiceEvent // text only (debug)
+	ParentService      *bpService
 }
 
 func CreateBitProphetBot() *BitProphetBot {
@@ -60,28 +61,31 @@ func (b *BitProphetBot) AutoSuggest() {
 		logger.Printf("[AutoSuggest] ERROR: %s", err)
 		return
 	}
-	//logger.Printf("REPLY: %s", reply)
 	var accList []api.CoinbaseAccount
 	err = json.Unmarshal(reply, &accList)
 	if err != nil {
 		logger.Printf("[AutoSuggest] ERROR: %s", err)
 		return
 	}
-
 	logger.Printf("[AutoSuggest] Found %d Accounts", len(accList))
 	var NativeAcc api.CoinbaseAccount
 	for _, acc := range accList {
 		if acc.Currency == Config.BPInternalAccount.NativeCurrency {
 			NativeAcc = acc
-
 		}
 	}
 	logger.Printf("[AutoSuggest] Found [%s] Account Total: $%s Available: $%s", NativeAcc.Currency, NativeAcc.Balance, NativeAcc.Available)
+	// Now we know our hard limit for spending (our native currency's available balance)
+	// Config.BotDefaults.MinCryptoBuy * CoinPrice = Minimum Spend Amount BEFORE FEES
+	/////////////////////////////////////////////////////////////////////////////////
+	for _, m := range Config.BotDefaults.Markets {
+		coinAsk := b.ParentService.CoinPricesNow[m].Ask
+		minPriceBuy := coinAsk * Config.BotDefaults.MinCryptoBuy
+		logger.Printf("[AutoSuggest] Price [%s] [$%.2f]", m, coinAsk)
+		logger.Printf("[AutoSuggest] MinCryptoBuy(0.1) * $%.2f = $%.2f", coinAsk, minPriceBuy)
+	}
 
-	// at start of suggestCheck we had AutoGdaxMinCryptoBuy, AutoGdaxMinUSDBuy, and AutoGdaxMaxUSDBuy and AutoGdaxMinPercentProfit
-	// Get those now
-	// those came from the UI before, set them in config and read in here
-	// old minimum was //min LTC Buy is 0.01 LTC // 0.01 of said coin, I think its 0.1 now, figure this out
+	///////////////////////////////////////////////////////////////////////////////////////////
 	// choose hour range (was 8 hours)
 
 	//QString highPrice = findHighestValue(lastPriceRange);

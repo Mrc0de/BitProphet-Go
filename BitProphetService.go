@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -31,6 +32,7 @@ type bpService struct {
 	CommandChannel   chan *bpServiceCommandMsg
 	CoinbaseChannel  chan *bpCoinBaseMsg
 	Quit             bool
+	CoinPricesNow    map[string]*bpCBPrice
 }
 
 type bpServiceEvent struct {
@@ -61,9 +63,16 @@ func CreateBPService() *bpService {
 		CommandChannel:   make(chan *bpServiceCommandMsg, 0),
 		CoinbaseChannel:  make(chan *bpCoinBaseMsg, 0),
 		Quit:             false,
+		CoinPricesNow:    make(map[string]*bpCBPrice, 0),
 	}
 	bps.Client.ParentService = &bps
 	bps.ServiceClients = append(bps.ServiceClients, bps.Client)
+	bps.TheBot.ParentService = &bps
+	for i := 0; i < len(Config.BitProphetServiceClient.DefaultSubscriptions); i++ {
+		bps.CoinPricesNow[Config.BitProphetServiceClient.DefaultSubscriptions[i]] = &bpCBPrice{
+			Market: Config.BitProphetServiceClient.DefaultSubscriptions[i],
+		}
+	}
 	return &bps
 }
 
@@ -144,12 +153,12 @@ type bpCBSubscribeRequest struct {
 
 //
 //// Misc Types for MSGs
-//type bpCBPrice struct {
-//	Market string
-//	Bid    float64
-//	Ask    float64
-//	Last   float64
-//}
+type bpCBPrice struct {
+	Market string
+	Bid    float64
+	Ask    float64
+	Last   float64
+}
 
 // ////////////////////////// //
 // BitProphet Service Method //
@@ -222,6 +231,35 @@ func (b *bpService) Run() {
 							EventData: fmt.Sprintf("[bpService] [INFLUX_WRITE_ERROR] [%s]", err),
 						}
 					}
+					ask, err := strconv.ParseFloat(cbMsg.MsgObj.BestAsk, 32)
+					if err != nil {
+						b.ReportingChannel <- &bpServiceEvent{
+							Time:      time.Now(),
+							EventType: "INTERNAL",
+							EventData: fmt.Sprintf("[bpService] [PARSEFLOAT_ERROR] [%s]", err),
+						}
+					}
+					b.CoinPricesNow[cbMsg.MsgObj.ProductID].Ask = ask
+
+					best, err := strconv.ParseFloat(cbMsg.MsgObj.BestBid, 32)
+					if err != nil {
+						b.ReportingChannel <- &bpServiceEvent{
+							Time:      time.Now(),
+							EventType: "INTERNAL",
+							EventData: fmt.Sprintf("[bpService] [PARSEFLOAT_ERROR] [%s]", err),
+						}
+					}
+					b.CoinPricesNow[cbMsg.MsgObj.ProductID].Bid = best
+
+					price, err := strconv.ParseFloat(cbMsg.MsgObj.Price, 32)
+					if err != nil {
+						b.ReportingChannel <- &bpServiceEvent{
+							Time:      time.Now(),
+							EventType: "INTERNAL",
+							EventData: fmt.Sprintf("[bpService] [PARSEFLOAT_ERROR] [%s]", err),
+						}
+					}
+					b.CoinPricesNow[cbMsg.MsgObj.ProductID].Last = price
 				} else {
 					b.ReportingChannel <- &bpServiceEvent{
 						Time:      time.Now(),

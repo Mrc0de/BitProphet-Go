@@ -26,3 +26,12 @@ bpdata:
   user: someuser
   pass: nottellin
   database: BitProphet
+
+bot_defaults:
+  min_crypto_buy: 0.1
+  min_percent_profit: 1.5
+  max_usd_buy: 50.00
+  fee_percent: 0.5
+  markets: ["LTC-USD"]
+
+cbversion: 2016-03-03

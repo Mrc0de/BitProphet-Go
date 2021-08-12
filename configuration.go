@@ -36,7 +36,14 @@ type Configuration struct {
 		DefaultCoins   []string `yaml:"defaultcoins"`
 		NativeCurrency string   `yaml:"nativecurrency"`
 	} `yaml:"bpinternalaccount"`
-	CBVersion string `yaml:"cbversion"`
+	CBVersion   string `yaml:"cbversion"`
+	BotDefaults struct {
+		MinCryptoBuy     float64  `yaml:"min_crypto_buy"`
+		MinPercentProfit float64  `yaml:"min_percent_profit"`
+		MaxUSDBuy        float64  `yaml:"max_usd_buy"`
+		FeePercent       float64  `yaml:"fee_percent"` // 0.50% of native currency amount
+		Markets          []string `yaml:"markets"`
+	} `yaml:"bot_defaults"`
 }
 
 func (s *Configuration) load(confFile string) error {
