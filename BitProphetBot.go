@@ -88,10 +88,12 @@ func (b *BitProphetBot) AutoSuggest() {
 	/////////////////////////////////////////////////////////////////////////////////
 	for _, m := range Config.BotDefaults.Markets {
 		coinAsk := b.ParentService.CoinPricesNow[m].Ask
+		coin := b.ParentService.CoinPricesNow[m].Market
 		minPriceBuy := coinAsk * Config.BotDefaults.MinCryptoBuy
+		willSpend := 0.0
 		logger.Printf("[AutoSuggest] Available [%s] [$%s]", NativeAcc.Currency, NativeAcc.Available)
 		logger.Printf("[AutoSuggest] Price [%s] [$%.2f]", m, coinAsk)
-		logger.Printf("[AutoSuggest] MinCryptoBuy(0.1) * $%.2f = $%.2f", coinAsk, minPriceBuy)
+		logger.Printf("[AutoSuggest] MinCryptoBuy: (%.2f %s * $%.2f) = MinPriceBuy: $%.2f", Config.BotDefaults.MinCryptoBuy, coin, coinAsk, minPriceBuy)
 		availCash, err := strconv.ParseFloat(NativeAcc.Available, 32)
 		if err != nil {
 			logger.Printf("[AutoSuggest] ERROR: %s", err)
@@ -100,6 +102,21 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] Not Enough Available %s, Aborting.", NativeAcc.Currency)
 			return
 		}
+		logger.Printf("[AutoSuggest] MaxBuy: $%.2f", Config.BotDefaults.MaxUSDBuy)
+		if minPriceBuy > Config.BotDefaults.MaxUSDBuy {
+			logger.Printf("[AutoSuggest] MinPrice is more than MaxBuy, Aborting.")
+			return
+		}
+		// We have enough to minimum buy....
+		// but instead we will buy UP TO maxBuy OR just min...
+		if availCash <= Config.BotDefaults.MaxUSDBuy {
+			// we cant buy up to max, just go with min
+			willSpend = minPriceBuy
+		} else {
+			// we can buy up to max, do it
+			willSpend = Config.BotDefaults.MaxUSDBuy
+		}
+		logger.Printf("[AutoSuggest] Will Spend: $%.2f", willSpend)
 		logger.Printf("[AutoSuggest] Analyzing Price History for %s", m)
 	}
 
