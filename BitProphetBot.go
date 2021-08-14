@@ -159,12 +159,12 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		logger.Printf("[AutoSuggest] Ask Price $%.2f is within the Buy Zone.", coinAsk)
 		// determine sellprice for this buy prospect
-		profitNeeded := (Config.BotDefaults.MinPercentProfit * 0.01) * willSpendWithBuyFee
-		willSellAt := willSpendWithBuyFee + profitNeeded
-		sellFee := (Config.BotDefaults.FeePercent * 0.01) * willSellAt
+		profitNeeded := (Config.BotDefaults.MinPercentProfit * 0.01) * willSpend
+		willSellFor := willSpendWithBuyFee + profitNeeded
+		sellFee := (Config.BotDefaults.FeePercent * 0.01) * willSellFor
 		logger.Printf("[AutoSuggest] Ask Price $%.2f \t[SpendWithFee: $%.2f] \t[ProfitNeeded: $%.2f] \t[WillSellFor: $%.2f] \t[SellFee: $%.2f] "+
-			"\t[Income: $%.2f] \t[Profit: $%.2f]",
-			coinAsk, willSpendWithBuyFee, profitNeeded, willSellAt, sellFee, willSellAt, willSellAt-sellFee-willSpendWithBuyFee)
+			"\t[Profit: $%.2f] \t[SellPrice: $%.2f]",
+			coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee, willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
