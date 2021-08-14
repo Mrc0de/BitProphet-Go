@@ -92,7 +92,7 @@ func (i *influx) GetMinMaxPrices(market string, maxHours int) {
 	}
 	for topnum, topval := range resp.Results {
 		for snum, sval := range topval.Series {
-			logger.Printf("TopNum: %d \t snum: %d \t sval: %v", topnum, snum, sval)
+			logger.Printf("TopNum: %d \t snum: %d \t MinPrice: $%.2f \t MaxPrice: $%.2f", topnum, snum, sval.Columns[1], sval.Columns[2])
 		}
 	}
 }
