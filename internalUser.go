@@ -191,7 +191,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		}{Error: "You broke something"})
 		return
 	}
-	logger.Printf("[InternalUserStats] Orders Found: %d", len(orderList))
+	//logger.Printf("[InternalUserStats] Orders Found: %d", len(orderList))
 
 	/// output
 	var stats struct {
