@@ -158,6 +158,7 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] Ask Price $%.2f outside of Buy Zone, ABORTED.", coinAsk)
 			continue
 		}
+		logger.Printf("[AutoSuggest] Ask Price $%.2f is within the Buy Zone.", coinAsk)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
