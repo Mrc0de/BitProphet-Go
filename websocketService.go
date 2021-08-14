@@ -112,7 +112,7 @@ func (c *wsClient) writePump() {
 					logger.Printf("[writePump] Write Closed on [%s]", err)
 					return
 				}
-				b, err := w.Write(message)
+				_, err = w.Write(message)
 				if err != nil {
 					logger.Printf("[writePump] Write Failed on [%s]", err)
 					return
