@@ -76,6 +76,7 @@ func main() {
 		case bpReport := <-BitProphet.ReportingChannel:
 			{
 				logger.Printf("[%s] [%s]", bpReport.EventType, bpReport.EventData)
+				WebService.WsService.WsHub.Broadcast <- []byte(bpReport.EventData)
 			}
 		case d := <-DebugChannel:
 			{

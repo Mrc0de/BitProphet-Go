@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	api "github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
 	"strconv"
 	"strings"
@@ -47,11 +48,7 @@ func (b *BitProphetBot) AutoSuggest() {
 	// we need to know the internal account's spendable balance
 	// go slowly if possible, dont hammer anything
 	// we need the 'current data' FIRST then we analyze the possibles.
-	b.AutoSuggestChannel <- &bpServiceEvent{
-		Time:      time.Now(),
-		EventType: "AUTO_SUGGEST",
-		EventData: "START",
-	}
+
 	// Documenting old way
 	// get wallet balance of primary currency (AVAILABLE BALANCE)
 	req := api.NewSecureRequest("list_accounts", Config.CBVersion) // create the req
@@ -165,7 +162,13 @@ func (b *BitProphetBot) AutoSuggest() {
 		logger.Printf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
 			"[Profit: $%.2f] [SellPrice: $%.2f]!",
 			coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee, willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount)
-
+		b.AutoSuggestChannel <- &bpServiceEvent{
+			Time:      time.Now(),
+			EventType: "AUTO_SUGGEST",
+			EventData: fmt.Sprintf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
+				"[Profit: $%.2f] [SellPrice: $%.2f]!", coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee,
+				willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount),
+		}
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////

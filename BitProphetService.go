@@ -201,8 +201,8 @@ func (b *bpService) Run() {
 				// handle AutoSuggest Events
 				b.ReportingChannel <- &bpServiceEvent{
 					Time:      time.Now(),
-					EventType: "INTERNAL",
-					EventData: fmt.Sprintf("Bot made a suggestion: %s %s", sug.EventType, sug.EventData),
+					EventType: "SUGGEST",
+					EventData: fmt.Sprintf("%s", sug.EventData),
 				}
 			}
 		case cmd := <-b.CommandChannel:
