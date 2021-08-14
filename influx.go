@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	client "github.com/influxdata/influxdb1-client"
 	"net/url"
@@ -100,12 +101,12 @@ func (i *influx) GetMinMaxPrices(market string, maxHours int) (PriceRange, error
 	}
 	for _, topval := range resp.Results {
 		for _, sval := range topval.Series {
-			minp, err := strconv.ParseFloat(sval.Values[0][1].(string), 32)
+			minp, err := strconv.ParseFloat(string(sval.Values[0][1].(json.Number)), 32)
 			if err != nil {
 				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
 				return pr, err
 			}
-			maxp, err := strconv.ParseFloat(sval.Values[0][1].(string), 32)
+			maxp, err := strconv.ParseFloat(string(sval.Values[0][1].(json.Number)), 32)
 			if err != nil {
 				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
 				return pr, err
