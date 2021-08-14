@@ -33,11 +33,6 @@ func (b *BitProphetBot) Run() {
 		select {
 		case <-autoSuggestTicker.C:
 			{
-				b.ServiceChannel <- &bpServiceEvent{
-					Time:      time.Now(),
-					EventType: "BOT",
-					EventData: "[BitProphetBot::Run] Running AutoSuggest",
-				}
 				b.AutoSuggest()
 			}
 		}
@@ -162,6 +157,11 @@ func (b *BitProphetBot) AutoSuggest() {
 		logger.Printf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
 			"[Profit: $%.2f] [SellPrice: $%.2f]!",
 			coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee, willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount)
+		if willSellFor-sellFee-willSpendWithBuyFee < 0.01 {
+			// less than 1 cent of profit... PASS, no thanks
+			logger.Printf("[AutoSuggest] NO PROFIT = NO BUY [PASS on Buying %s]", m[:strings.Index(m, "-")])
+			continue
+		}
 		b.AutoSuggestChannel <- &bpServiceEvent{
 			Time:      time.Now(),
 			EventType: "AUTO_SUGGEST",
