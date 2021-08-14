@@ -117,7 +117,7 @@ func (c *wsClient) writePump() {
 					logger.Printf("[writePump] Write Failed on [%s]", err)
 					return
 				}
-				logger.Printf("Wrote [%d bytes] to [%s]", b, c.WSConn.RemoteAddr())
+				//logger.Printf("Wrote [%d bytes] to [%s]", b, c.WSConn.RemoteAddr())
 				if err := w.Close(); err != nil {
 					logger.Printf("[writePump] Closed on [%s]", err)
 					return
