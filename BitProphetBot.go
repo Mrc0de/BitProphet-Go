@@ -163,8 +163,9 @@ func (b *BitProphetBot) AutoSuggest() {
 		willSellFor := willSpendWithBuyFee + profitNeeded
 		sellFee := (Config.BotDefaults.FeePercent * 0.01) * willSellFor
 		logger.Printf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
-			"[Profit: $%.2f] [SellPrice: $%.2f]\r\n\r\n\r\n",
+			"[Profit: $%.2f] [SellPrice: $%.2f]!",
 			coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee, willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount)
+
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
