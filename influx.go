@@ -71,3 +71,28 @@ func (i *influx) WriteCoinbaseTicker(ticker CoinbaseMessage) error {
 	}
 	return nil
 }
+
+func (i *influx) GetMinMaxPrices(market string, maxHours int) {
+	//default maxHours = 4
+	if maxHours == 0 {
+		maxHours = 4
+	}
+	q := client.Query{
+		Command: fmt.Sprintf("SELECT min(price) as minPrice, max(price) as maxPrice FROM tickers where market='%s' and time > now()-%dh;",
+			market, maxHours),
+		Database: "coinbasePriceHistory",
+	}
+	resp, err := i.Client.Query(q)
+	// basic error
+	if err != nil {
+		logger.Printf("[GetMinMaxPrices] Influx Query Failure: %s", err)
+	}
+	if resp.Error() != nil {
+		logger.Printf("[GetMinMaxPrices] Influx Query Response Failure: %s", err)
+	}
+	for topnum, topval := range resp.Results {
+		for snum, sval := range topval.Series {
+			logger.Printf("TopNum: %d \t snum: %d \t sval: %v", topnum, snum, sval)
+		}
+	}
+}

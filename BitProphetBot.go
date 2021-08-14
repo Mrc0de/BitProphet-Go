@@ -136,7 +136,13 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		logger.Printf("[AutoSuggest] Coin Amount: %.8f @ Price: $%.2f For $%.2f ( w/Fee: $%.2f )", willBuyCoinAmount, coinAsk, willSpend, willSpendWithBuyFee)
 		// but SHOULD we buy now at current price?
+		// Determine time-frame-price-range
+		// determine buffer zone
+		// is price within buffer, if so, check sell price probability, if good, purchase and immediately place for sale at sellprice
+		// sellprice determined by fees, buy amount and price, as well as, percent profit setting
 		logger.Printf("[AutoSuggest] Analyzing Price History for %s", m)
+		//  SELECT min(price) as mini ,max(price) as maxi FROM tickers where market='LTC-USD' and time > now()-4h;
+		b.ParentService.Client.Influx.GetMinMaxPrices(m, 4)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
