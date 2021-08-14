@@ -140,7 +140,7 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 			debug.PrintStack()
 		}
 	}()
-	fmt.Println("[SecureRequest::Process]")
+	//fmt.Println("[SecureRequest::Process]")
 	var (
 		err   error
 		req   *http.Request
