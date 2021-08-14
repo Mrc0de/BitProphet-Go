@@ -348,7 +348,10 @@
             dbg("Connected to geekprojex.com");
         });
         sock.addEventListener('message', function (event) {
-            dbg('Message from server ' + event.data.trim());
+            if (event.data.length < 8) {
+                return;
+            }
+            dbg('[GP] ' + event.data.trim());
             $('#debugOut').scrollTop($('#debugOut')[0].scrollHeight);
         });
         sock.addEventListener('ping', function (event) {
