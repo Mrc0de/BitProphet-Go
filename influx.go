@@ -92,7 +92,15 @@ func (i *influx) GetMinMaxPrices(market string, maxHours int) {
 	}
 	for topnum, topval := range resp.Results {
 		for snum, sval := range topval.Series {
-			logger.Printf("TopNum: %d \t snum: %d \t MinPrice: $%.2f \t MaxPrice: $%.2f", topnum, snum, sval.Columns[1], sval.Columns[2])
+			minp, err := strconv.ParseFloat(sval.Columns[1], 32)
+			if err != nil {
+				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
+			}
+			maxp, err := strconv.ParseFloat(sval.Columns[2], 32)
+			if err != nil {
+				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
+			}
+			logger.Printf("TopNum: %d \t snum: %d \t MinPrice: $%.2f \t MaxPrice: $%.2f", topnum, snum, minp, maxp)
 		}
 	}
 }
