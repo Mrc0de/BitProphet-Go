@@ -12,6 +12,11 @@ type influx struct {
 	Client *client.Client
 }
 
+type PriceRange struct {
+	MinPrice float64 `json:"min_price"`
+	MaxPrice float64 `json:"max_price"`
+}
+
 func (i *influx) Connect() error {
 	host, err := url.Parse(fmt.Sprintf("https://%s:%d", Config.InfluxDatabase.Host, 8086))
 	if err != nil {
@@ -72,11 +77,12 @@ func (i *influx) WriteCoinbaseTicker(ticker CoinbaseMessage) error {
 	return nil
 }
 
-func (i *influx) GetMinMaxPrices(market string, maxHours int) {
+func (i *influx) GetMinMaxPrices(market string, maxHours int) (PriceRange, error) {
 	//default maxHours = 4
 	if maxHours == 0 {
 		maxHours = 4
 	}
+	pr := PriceRange{}
 	q := client.Query{
 		Command: fmt.Sprintf("SELECT min(price) as minPrice, max(price) as maxPrice FROM tickers where market='%s' and time > now()-%dh;",
 			market, maxHours),
@@ -86,21 +92,28 @@ func (i *influx) GetMinMaxPrices(market string, maxHours int) {
 	// basic error
 	if err != nil {
 		logger.Printf("[GetMinMaxPrices] Influx Query Failure: %s", err)
+		return pr, err
 	}
 	if resp.Error() != nil {
 		logger.Printf("[GetMinMaxPrices] Influx Query Response Failure: %s", err)
+		return pr, err
 	}
-	for topnum, topval := range resp.Results {
-		for snum, sval := range topval.Series {
+	for _, topval := range resp.Results {
+		for _, sval := range topval.Series {
 			minp, err := strconv.ParseFloat(sval.Columns[1], 32)
 			if err != nil {
 				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
+				return pr, err
 			}
 			maxp, err := strconv.ParseFloat(sval.Columns[2], 32)
 			if err != nil {
 				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
+				return pr, err
 			}
-			logger.Printf("TopNum: %d \t snum: %d \t MinPrice: $%.2f \t MaxPrice: $%.2f", topnum, snum, minp, maxp)
+			logger.Printf("[GetMinMaxPrices] MinPrice: $%.2f \t MaxPrice: $%.2f", minp, maxp)
+			pr.MinPrice = minp
+			pr.MaxPrice = maxp
 		}
 	}
+	return pr, err
 }

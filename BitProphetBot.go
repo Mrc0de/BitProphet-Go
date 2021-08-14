@@ -142,7 +142,12 @@ func (b *BitProphetBot) AutoSuggest() {
 		// sellprice determined by fees, buy amount and price, as well as, percent profit setting
 		logger.Printf("[AutoSuggest] Analyzing Price History for %s", m)
 		//  SELECT min(price) as mini ,max(price) as maxi FROM tickers where market='LTC-USD' and time > now()-4h;
-		b.ParentService.Client.Influx.GetMinMaxPrices(m, 4)
+		pr, err := b.ParentService.Client.Influx.GetMinMaxPrices(m, 4)
+		if err != nil {
+			logger.Printf("[AutoSuggest] ERROR: %s, Aborting", err)
+			continue
+		}
+		logger.Printf("[AutoSuggest] Price Range (4h): $%.2f - $%.2f", pr.MinPrice, pr.MaxPrice)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
