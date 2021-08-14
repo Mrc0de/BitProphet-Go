@@ -106,7 +106,7 @@ func (i *influx) GetMinMaxPrices(market string, maxHours int) (PriceRange, error
 				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
 				return pr, err
 			}
-			maxp, err := strconv.ParseFloat(string(sval.Values[0][1].(json.Number)), 32)
+			maxp, err := strconv.ParseFloat(string(sval.Values[0][2].(json.Number)), 32)
 			if err != nil {
 				logger.Printf("[GetMinMaxPrices] ParseFloat Error: %s", err)
 				return pr, err
