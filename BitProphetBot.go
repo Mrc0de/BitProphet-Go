@@ -147,8 +147,8 @@ func (b *BitProphetBot) AutoSuggest() {
 			continue
 		}
 		logger.Printf("[AutoSuggest] Price Range (4h): $%.2f - $%.2f", pr.MinPrice, pr.MaxPrice)
-		// find BUFFERZONE FLOOR (above 10% of gap above floor)
-		// find BUFFERZONE CEILING (BELOW 10% of gap below ceiling)
+		// find BUFFERZONE FLOOR (above 5% of gap above floor)
+		// find BUFFERZONE CEILING (BELOW 15% of gap below ceiling)
 		gap := pr.MaxPrice - pr.MinPrice
 		zoneFloor := (gap * 0.05) + pr.MinPrice
 		zoneRoof := pr.MaxPrice - (gap * 0.15)
@@ -162,8 +162,8 @@ func (b *BitProphetBot) AutoSuggest() {
 		profitNeeded := (Config.BotDefaults.MinPercentProfit * 0.01) * willSpend
 		willSellFor := willSpendWithBuyFee + profitNeeded
 		sellFee := (Config.BotDefaults.FeePercent * 0.01) * willSellFor
-		logger.Printf("[AutoSuggest] Ask Price $%.2f \t[SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
-			"[Profit: $%.2f] [SellPrice: $%.2f]",
+		logger.Printf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
+			"[Profit: $%.2f] [SellPrice: $%.2f]\r\n\r\n\r\n",
 			coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee, willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount)
 	}
 
