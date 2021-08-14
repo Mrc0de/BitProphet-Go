@@ -104,7 +104,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Printf("[InternalUserStats] Found %d Accounts", len(accList))
+	//logger.Printf("[InternalUserStats] Found %d Accounts", len(accList))
 	var relevantAccounts []api.CoinbaseAccount
 	for _, coin := range Config.BPInternalAccount.DefaultCoins {
 		for _, acc := range accList {
@@ -113,16 +113,16 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	logger.Printf("[InternalUserStats] Found %d Relevant Accounts", len(relevantAccounts))
+	//logger.Printf("[InternalUserStats] Found %d Relevant Accounts", len(relevantAccounts))
 	var AccountStats []InternalUserStat
-	for z, a := range relevantAccounts {
+	for _, a := range relevantAccounts {
 		var stat InternalUserStat
-		logger.Printf("[InternalUserStats] [%d] Coin %s", z, a.Currency)
+		//logger.Printf("[InternalUserStats] [%d] Coin %s", z, a.Currency)
 		stat.Currency = a.Currency
 		if a.Currency == "USD" {
 			a.Balance = a.Balance[:strings.Index(a.Balance, ".")+3]
 		}
-		logger.Printf("[InternalUserStats] [%d] Balance: %s", z, a.Balance)
+		//logger.Printf("[InternalUserStats] [%d] Balance: %s", z, a.Balance)
 		stat.Balance, err = strconv.ParseFloat(a.Balance, 64)
 		if err != nil {
 			logger.Printf("[InternalUserStats] ERROR: %s", err)
@@ -136,7 +136,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		if a.Currency == "USD" {
 			a.Available = a.Available[:strings.Index(a.Available, ".")+3]
 		}
-		logger.Printf("[InternalUserStats] [%d] Available: %s", z, a.Available)
+		//logger.Printf("[InternalUserStats] [%d] Available: %s", z, a.Available)
 		stat.Available, err = strconv.ParseFloat(a.Available, 64)
 		if err != nil {
 			logger.Printf("[InternalUserStats] ERROR: %s", err)
@@ -150,7 +150,7 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 		if a.Currency == "USD" {
 			a.Hold = a.Hold[:strings.Index(a.Hold, ".")+3]
 		}
-		logger.Printf("[InternalUserStats] [%d] Held: %s", z, a.Hold)
+		//logger.Printf("[InternalUserStats] [%d] Held: %s", z, a.Hold)
 		stat.Hold, err = strconv.ParseFloat(a.Hold, 64)
 		if err != nil {
 			logger.Printf("[InternalUserStats] ERROR: %s", err)
@@ -161,8 +161,8 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 			}{Error: "You broke something"})
 			return
 		}
-		logger.Printf("[InternalUserStats] [%d] Enabled: %t", z, a.TradingEnabled)
-		logger.Printf("[InternalUserStats] ----\t----\t----\t----")
+		//logger.Printf("[InternalUserStats] [%d] Enabled: %t", z, a.TradingEnabled)
+		//logger.Printf("[InternalUserStats] ----\t----\t----\t----")
 		AccountStats = append(AccountStats, stat)
 	}
 	// Stats done, get orders
