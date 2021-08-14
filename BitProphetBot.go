@@ -133,12 +133,17 @@ func (b *BitProphetBot) AutoSuggest() {
 		// sellprice determined by fees, buy amount and price, as well as, percent profit setting
 		logger.Printf("[AutoSuggest] Analyzing Price History for %s", m)
 		//  SELECT min(price) as mini ,max(price) as maxi FROM tickers where market='LTC-USD' and time > now()-4h;
-		pr, err := b.ParentService.Client.Influx.GetMinMaxPrices(m, 4)
+		pr, err := b.ParentService.Client.Influx.GetMinMaxPrices(m, 8)
 		if err != nil {
 			logger.Printf("[AutoSuggest] ERROR: %s, Aborting", err)
 			continue
 		}
-		logger.Printf("[AutoSuggest] Price Range (4h): $%.2f - $%.2f", pr.MinPrice, pr.MaxPrice)
+		logger.Printf("[AutoSuggest] Price Range (8h): $%.2f - $%.2f", pr.MinPrice, pr.MaxPrice)
+		b.AutoSuggestChannel <- &bpServiceEvent{
+			Time:      time.Now(),
+			EventType: "AUTO_SUGGEST",
+			EventData: fmt.Sprintf("[AutoSuggest] Price Range (8h): $%.2f - $%.2f", pr.MinPrice, pr.MaxPrice),
+		}
 		// find BUFFERZONE FLOOR (above 5% of gap above floor)
 		// find BUFFERZONE CEILING (BELOW 15% of gap below ceiling)
 		gap := pr.MaxPrice - pr.MinPrice
