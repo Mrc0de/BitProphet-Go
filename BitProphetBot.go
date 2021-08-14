@@ -148,6 +148,11 @@ func (b *BitProphetBot) AutoSuggest() {
 			continue
 		}
 		logger.Printf("[AutoSuggest] Price Range (4h): $%.2f - $%.2f", pr.MinPrice, pr.MaxPrice)
+		// find BUFFERZONE FLOOR (above 10% above floor)
+		// find BUFFERZONE CEILING (BELOW 10% below ceiling)
+		zoneFloor := (pr.MinPrice * 0.10) + pr.MinPrice
+		zoneRoof := pr.MaxPrice - (pr.MaxPrice * 0.10)
+		logger.Printf("[AutoSuggest] Buy Buffer: $%.2f - $%.2f", zoneFloor, zoneRoof)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
