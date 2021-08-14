@@ -136,7 +136,6 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		logger.Printf("[AutoSuggest] Coin Amount: %.8f @ Price: $%.2f For $%.2f ( w/Fee: $%.2f )", willBuyCoinAmount, coinAsk, willSpend, willSpendWithBuyFee)
 		// but SHOULD we buy now at current price?
-		// Determine time-frame-price-range
 		// determine buffer zone
 		// is price within buffer, if so, check sell price probability, if good, purchase and immediately place for sale at sellprice
 		// sellprice determined by fees, buy amount and price, as well as, percent profit setting
@@ -159,6 +158,13 @@ func (b *BitProphetBot) AutoSuggest() {
 			continue
 		}
 		logger.Printf("[AutoSuggest] Ask Price $%.2f is within the Buy Zone.", coinAsk)
+		// determine sellprice for this buy prospect
+		profitNeeded := (Config.BotDefaults.MinPercentProfit * 0.01) * willSpendWithBuyFee
+		willSellAt := willSpendWithBuyFee + profitNeeded
+		sellFee := (Config.BotDefaults.FeePercent * 0.01) * willSellAt
+		logger.Printf("[AutoSuggest] Ask Price $%.2f \t[SpendWithFee: $%.2f] \t[ProfitNeeded: $%.2f] \t[WillSellFor: $%.2f] \t[SellFee: $%.2f] "+
+			"\t[Income: $%.2f] \t[Profit: $%.2f]",
+			coinAsk, willSpendWithBuyFee, profitNeeded, willSellAt, sellFee, willSellAt, willSellAt-sellFee)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
