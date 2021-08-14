@@ -153,7 +153,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		gap := pr.MaxPrice - pr.MinPrice
 		zoneFloor := (gap * 0.10) + pr.MinPrice
 		zoneRoof := pr.MaxPrice - (gap * 0.10)
-		logger.Printf("[AutoSuggest] Buy Buffer: $%.2f - $%.2f", zoneFloor, zoneRoof)
+		logger.Printf("[AutoSuggest] Buy Zone: $%.2f - $%.2f", zoneFloor, zoneRoof)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
