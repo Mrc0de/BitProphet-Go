@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
@@ -11,11 +12,44 @@ import (
 )
 
 type CoinbaseOrderResponse struct {
-	Message  string `json:"message"`
-	ID       string `json:"id"`
-	Status   string `json:"status"`
-	Settled  bool   `json:"settled"`
-	FillFees string `json:"fill_fees"`
+	Message        string    `json:"message"`
+	ID             string    `json:"id"`
+	Size           string    `json:"size"`
+	ProductId      string    `json:"product_id"`
+	Side           string    `json:"side"`
+	Stp            string    `json:"stp"`
+	Funds          string    `json:"funds"`
+	SpecifiedFunds string    `json:"specified_funds"`
+	Type           string    `json:"type"`
+	PostOnly       bool      `json:"post_only"`
+	CreatedAt      time.Time `json:"created_at"`
+	DoneAt         time.Time `json:"done_at"`
+	DoneReason     string    `json:"done_reason"`
+	FillFees       string    `json:"fill_fees"`
+	FilledSize     string    `json:"filled_size"`
+	ExecutedValue  string    `json:"executed_value"`
+	Status         string    `json:"status"`
+	Settled        bool      `json:"settled"`
+}
+
+type BitProphetLedgerRecord struct {
+	ID               uuid.UUID       `json:"id"`
+	Market           sql.NullString  `json:"market"`
+	Type             sql.NullString  `json:"type"`
+	Cost             sql.NullFloat64 `json:"cost"`
+	Price            sql.NullFloat64 `json:"price"`
+	CoinAmount       sql.NullFloat64 `json:"coin_amount"`
+	BuyFee           sql.NullFloat64 `json:"buy_fee"`
+	ProjectedSellFee sql.NullFloat64 `json:"projected_sell_fee"`
+	Time             sql.NullTime    `json:"time"`
+	SellFee          sql.NullFloat64 `json:"sell_fee"`
+	SellPrice        sql.NullFloat64 `json:"sell_price"`
+	BuyOrderID       sql.NullString  `json:"buy_order_id"`
+	SellOrderID      sql.NullString  `json:"sell_order_id"`
+	TimeSold         sql.NullTime    `json:"time_sold"`
+	Status           sql.NullString  `json:"status"`
+	FilledBuy        sql.NullBool    `json:"filled_buy"`
+	FilledSell       sql.NullBool    `json:"filled_sell"`
 }
 
 type BitProphetBot struct {
@@ -38,11 +72,16 @@ func (b *BitProphetBot) Run() {
 		EventData: "[BitProphetBot::Run] Started Bot",
 	}
 	autoSuggestTicker := time.NewTicker(60 * time.Second)
+	checkBuyFillsTicker := time.NewTicker(90 * time.Second)
 	for {
 		select {
 		case <-autoSuggestTicker.C:
 			{
 				b.AutoSuggest()
+			}
+		case <-checkBuyFillsTicker.C:
+			{
+				b.CheckBuyFills()
 			}
 		}
 	}
@@ -250,7 +289,112 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
+		logger.Printf("[AUTO_SUGGEST] Purchased %d of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount)
+		b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Purchased %d of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount))
 	}
+}
+
+func (b *BitProphetBot) CheckBuyFills() {
+	fills := []BitProphetLedgerRecord{}
+	rows, err := LocalDB.Query(`SELECT ID,Market,Type,Cost,Price,CoinAmount,BuyFee,ProjectedSellFee,SellPrice,BuyOrderID,Status FROM Ledger WHERE
+										Status='pending' AND Type='buy'`)
+	if err != nil {
+		logger.Printf("[CheckBuyFills] DB Error: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		f := BitProphetLedgerRecord{}
+		err = rows.Scan(&f.ID, &f.Market, &f.Type, &f.Cost, &f.Price, &f.CoinAmount, &f.BuyFee, &f.ProjectedSellFee, &f.SellPrice, &f.BuyOrderID, &f.Status)
+		if err != nil {
+			logger.Printf("[CheckBuyFills] DB Scan Error: %s", err)
+			return
+		}
+		fills = append(fills, f)
+	}
+	logger.Printf("[CheckBuyFills] Found %d Pending Buy Orders in Ledger")
+	for _, f := range fills {
+		// may need to limit this, I think 8 per some_interval is the maximum and there is no batch check (/fills endpoint isnt what I want)
+		req := api.NewSecureRequest("get_order", Config.CBVersion) // create the req
+		req.Credentials.Key = Config.BPInternalAccount.AccessKey   // setup it's creds
+		req.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
+		req.Credentials.Secret = Config.BPInternalAccount.Secret
+		req.Url += f.BuyOrderID.String
+		reply, err := req.Process(logger)
+		if err != nil {
+			logger.Printf("[CheckBuyFills] ERROR: %s", err)
+			return
+		}
+		resp := CoinbaseOrderResponse{}
+		err = json.Unmarshal(reply, &resp)
+		if err != nil {
+			logger.Printf("[CheckBuyFills] UnMarshall ERROR: %s", err)
+			return
+		}
+		if resp.Settled {
+			logger.Printf("[CheckBuyFills] Found Buy Fill: %s %s", resp.ID, resp.ProductId, resp.Status)
+			f.FilledBuy.Bool = true
+			f.FilledBuy.Valid = true
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,FilledBuy=? WHERE BuyOrderID=?`, resp.Status, true, resp.ID) // this update indicates the fill
+			if err != nil {
+				logger.Printf("[CheckBuyFills] DB Update ERROR: %s", err)
+				return
+			}
+			// Lets try to place it for sale at saleprice
+			// sell
+			sreq := api.NewSecureRequest("place_order", Config.CBVersion) // create the req
+			sreq.Credentials.Key = Config.BPInternalAccount.AccessKey     // setup it's creds
+			sreq.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
+			sreq.Credentials.Secret = Config.BPInternalAccount.Secret
+			sreq.RequestMethod = "POST"
+			var sell struct {
+				Size   string `json:"size"`
+				Price  string `json:"price"`
+				Side   string `json:"side"`
+				Market string `json:"product_id"`
+			}
+			sell.Side = "sell"
+			sell.Market = f.Market.String
+			sell.Size = fmt.Sprintf("%.8f", f.CoinAmount.Float64)
+			sell.Price = fmt.Sprintf("%.2f", f.SellPrice.Float64)
+
+			sbody, err := json.Marshal(sell)
+			if err != nil {
+				logger.Printf("[CheckBuyFills] Buy Error: %s", err)
+			}
+			sreq.RequestBody = string(sbody)
+			sresp, err := sreq.Process(logger) // process request
+			if err != nil {
+				logger.Printf("[CheckBuyFills] Buy Request Error: %s", err)
+			}
+			jresp := CoinbaseOrderResponse{}
+			err = json.Unmarshal(sresp, &jresp)
+			if err != nil {
+				logger.Printf("[CheckBuyFills] Sell Response unmarshall Error: %s", err)
+				logger.Printf("[CheckBuyFills] ----\t----\t----\t----\r\n")
+				continue
+			}
+			if len(jresp.ID) < 1 {
+				logger.Printf("[CheckBuyFills] Sell Order Failed: NO ID IN RESPONSE")
+				logger.Printf("[CheckBuyFills] SENT: %v", sell)
+				logger.Println()
+				logger.Printf("[CheckBuyFills] RESP: %v", jresp)
+				logger.Println()
+				logger.Printf("[CheckBuyFills] ----\t----\t----\t----\r\n")
+				continue
+			}
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SellOrderID=? WHERE BuyOrderID=?`, resp.Status, jresp.ID, resp.ID)
+			if err != nil {
+				logger.Printf("[CheckBuyFills] DB Update ERROR: %s", err)
+				return
+			}
+			b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Placed Sell %s %.8f for $%.2f", f.Market.String, f.CoinAmount.Float64, f.SellPrice.Float64))
+		}
+	}
+}
+
+func (b *BitProphetBot) CheckSellFills() {
+
 }
 
 func (b *BitProphetBot) ChatSay(text string) {
