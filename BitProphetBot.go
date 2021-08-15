@@ -3,11 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	api "github.com/mrc0de/BitProphet-Go/CoinbaseAPI"
 	"strconv"
 	"strings"
 	"time"
 )
+
+type CoinbaseOrderResponse struct {
+	Message  string `json:"message"`
+	ID       string `json:"id"`
+	Status   string `json:"status"`
+	Settled  bool   `json:"settled"`
+	FillFees string `json:"fill_fees"`
+}
 
 type BitProphetBot struct {
 	ServiceChannel     chan *bpServiceEvent
@@ -191,9 +200,13 @@ func (b *BitProphetBot) AutoSuggest() {
 			Market string  `json:"product_id"`
 		}
 		buy.Size = willBuyCoinAmount
-		buy.Price = coinAsk
 		buy.Side = "buy"
 		buy.Market = m
+		strAsk := fmt.Sprintf("%.2f", coinAsk)
+		buy.Price, err = strconv.ParseFloat(strAsk, 32)
+		if err != nil {
+			logger.Printf("[AutoSuggest] Buy Error: %s", err)
+		}
 		rbody, err := json.Marshal(buy)
 		if err != nil {
 			logger.Printf("[AutoSuggest] Buy Error: %s", err)
@@ -203,7 +216,34 @@ func (b *BitProphetBot) AutoSuggest() {
 		if err != nil {
 			logger.Printf("[AutoSuggest] Buy Request Error: %s", err)
 		}
-		logger.Printf("[AUTOSUGGEST] \t %s", bresp)
+		jresp := CoinbaseOrderResponse{}
+		err = json.Unmarshal(bresp, &jresp)
+		if err != nil {
+			logger.Printf("[AutoSuggest] Buy Response unmarshall Error: %s", err)
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
+			continue
+		}
+		newU, err := uuid.NewUUID()
+		if err != nil {
+			logger.Printf("[AutoSuggest] UUID Error: %s", err)
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
+			continue
+		}
+		u, err := newU.MarshalBinary()
+		if err != nil {
+			logger.Printf("[AutoSuggest] UUID Marshall Error: %s", err)
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
+			continue
+		}
+		logger.Printf("[AUTOSUGGEST] \t %v", jresp)
+		_, err = LocalDB.Exec(`INSERT INTO Ledger (ID,Market,Type,Cost,Price,CoinAmount,BuyFee,ProjectSellFee,SellPrice,Time,BuyOrderID,Status) VALUES(
+                              ?,?,?,?,?,?,?,?,?,?,?)`, u, m, "buy", willSpendWithBuyFee, buy.Price, willBuyCoinAmount, buyFee, sellFee, willSellFor/willBuyCoinAmount,
+			time.Now(), jresp.ID, jresp.Status)
+		if err != nil {
+			logger.Printf("[AutoSuggest] DB INSERT Error: %s", err)
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
+			continue
+		}
 	}
 }
 
