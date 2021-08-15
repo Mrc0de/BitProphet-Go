@@ -132,7 +132,7 @@ func UrlForRequestName(name string) string {
 		}
 	case "get_order":
 		{
-			return "/orders/" //<OrderUUIDString> <-- supply this part //GET
+			return "/orders/" //<OrderUUIDString> <-- supply this part //
 		}
 	default:
 		{
