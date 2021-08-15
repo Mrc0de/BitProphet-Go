@@ -436,7 +436,7 @@ func (b *BitProphetBot) CheckSellFills() {
 			return
 		}
 		if resp.Settled {
-			logger.Printf("[CheckSellFills] [Settled Sell] [%s] \t[%s] [%s] [%.8f] [SellPrice: $%.2f]", resp.ID, resp.Status, resp.ProductId, resp.Size, resp.SpecifiedFunds)
+			logger.Printf("[CheckSellFills] [Settled Sell] [%s] \t[%s] [%s] [%s] [SellPrice: %s]", resp.ID, resp.Status, resp.ProductId, resp.Size, resp.SpecifiedFunds)
 		}
 	}
 }
