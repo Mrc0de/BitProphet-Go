@@ -289,8 +289,8 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
-		logger.Printf("[AUTO_SUGGEST] Purchased %d of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount)
-		b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Purchased %d of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount))
+		logger.Printf("[AUTO_SUGGEST] Purchased %s of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount)
+		b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Purchased %s of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount))
 	}
 }
 
@@ -312,7 +312,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 		}
 		fills = append(fills, f)
 	}
-	logger.Printf("[CheckBuyFills] Found %d Pending Buy Orders in Ledger")
+	logger.Printf("[CheckBuyFills] Found %d Pending Buy Orders in Ledger", len(fills))
 	for _, f := range fills {
 		// may need to limit this, I think 8 per some_interval is the maximum and there is no batch check (/fills endpoint isnt what I want)
 		req := api.NewSecureRequest("get_order", Config.CBVersion) // create the req
@@ -332,7 +332,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 			return
 		}
 		if resp.Settled {
-			logger.Printf("[CheckBuyFills] Found Buy Fill: %s %s", resp.ID, resp.ProductId, resp.Status)
+			logger.Printf("[CheckBuyFills] Found Buy Fill: %s %s [%s]", resp.ID, resp.ProductId, resp.Status)
 			f.FilledBuy.Bool = true
 			f.FilledBuy.Valid = true
 			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,FilledBuy=? WHERE BuyOrderID=?`, resp.Status, true, resp.ID) // this update indicates the fill
