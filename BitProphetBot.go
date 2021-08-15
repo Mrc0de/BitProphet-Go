@@ -168,7 +168,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		logger.Printf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
 			"[Profit: $%.2f] [SellPrice: $%.2f]!",
 			coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee, willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount)
-		if willSellFor-sellFee-willSpendWithBuyFee < 0.01 || willSellFor/willBuyCoinAmount < pr.MaxPrice {
+		if willSellFor-sellFee-willSpendWithBuyFee < 0.01 || willSellFor/willBuyCoinAmount > pr.MaxPrice {
 			// less than 1 cent of profit... PASS, no thanks
 			logger.Printf("[AutoSuggest] NO PROFIT = NO BUY [PASS on Buying %s]", m[:strings.Index(m, "-")])
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
