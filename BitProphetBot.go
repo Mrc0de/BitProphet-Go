@@ -156,6 +156,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		b.ChatSay(fmt.Sprintf("[AutoSuggest] Buy Zone: $%.2f - $%.2f", zoneFloor, zoneRoof))
 		if coinAsk < zoneFloor || coinAsk > zoneRoof {
 			logger.Printf("[AutoSuggest] Ask Price $%.2f outside of Buy Zone, ABORTED.", coinAsk)
+			b.ChatSay(fmt.Sprintf("[AutoSuggest] Ask Price $%.2f outside of Buy Zone, ABORTED.", coinAsk))
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
