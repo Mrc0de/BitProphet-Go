@@ -223,6 +223,11 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
+		if len(jresp.ID) < 1 {
+			logger.Printf("[AutoSuggest] Buy Order Failed: NO ID IN RESPONSE")
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
+			continue
+		}
 		newU, err := uuid.NewUUID()
 		if err != nil {
 			logger.Printf("[AutoSuggest] UUID Error: %s", err)
@@ -237,7 +242,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		logger.Printf("[AUTOSUGGEST] \t %v", jresp)
 		_, err = LocalDB.Exec(`INSERT INTO Ledger (ID,Market,Type,Cost,Price,CoinAmount,BuyFee,ProjectSellFee,SellPrice,Time,BuyOrderID,Status) VALUES(
-                              ?,?,?,?,?,?,?,?,?,?,?)`, u, m, "buy", willSpendWithBuyFee, buy.Price, willBuyCoinAmount, buyFee, sellFee, willSellFor/willBuyCoinAmount,
+                              ?,?,?,?,?,?,?,?,?,?,?,?)`, u, m, "buy", willSpendWithBuyFee, buy.Price, willBuyCoinAmount, buyFee, sellFee, willSellFor/willBuyCoinAmount,
 			time.Now(), jresp.ID, jresp.Status)
 		if err != nil {
 			logger.Printf("[AutoSuggest] DB INSERT Error: %s", err)
