@@ -201,7 +201,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		buy.Side = "buy"
 		buy.Market = m
-		strSize := fmt.Sprintf("%.8f", willBuyCoinAmount)
+		strSize := fmt.Sprintf("%.7f", willBuyCoinAmount)
 		buy.Size, err = strconv.ParseFloat(strSize, 32)
 		if err != nil {
 			logger.Printf("[AutoSuggest] Buy Error: %s", err)
