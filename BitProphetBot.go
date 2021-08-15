@@ -229,7 +229,10 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		if len(jresp.ID) < 1 {
 			logger.Printf("[AutoSuggest] Buy Order Failed: NO ID IN RESPONSE")
+			logger.Printf("[AUTOSUGGEST] SENT: %v", buy)
+			logger.Println()
 			logger.Printf("[AUTOSUGGEST] RESP: %v", jresp)
+			logger.Println()
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
