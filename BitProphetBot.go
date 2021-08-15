@@ -172,65 +172,17 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
-		b.AutoSuggestChannel <- &bpServiceEvent{
-			Time:      time.Now(),
-			EventType: "AUTO_SUGGEST",
-			EventData: fmt.Sprintf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
-				"[Profit: $%.2f] [SellPrice: $%.2f]!", coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee,
-				willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount),
-		}
+		b.ChatSay(fmt.Sprintf("[AutoSuggest] [Price $%.2f] [SpendWithFee: $%.2f] [ProfitNeeded: $%.2f] [WillSellFor: $%.2f] [SellFee: $%.2f] "+
+			"[Profit: $%.2f] [SellPrice: $%.2f]!", coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee,
+			willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount))
 		logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 	}
+}
 
-	///////////////////////////////////////////////////////////////////////////////////////////
-	// choose hour range (was 8 hours)
-	// use influx instead of this.....
-
-	//QString highPrice = findHighestValue(lastPriceRange);
-	//QString highAsk = findHighestValue(askRange);
-	//QString highBid = findHighestValue(bidRange);
-	//
-	//QString lowPrice = findLowestValue(lastPriceRange);
-	//QString lowAsk = findLowestValue(askRange);
-	//QString lowBid = findLowestValue(bidRange);
-	//sayGdaxAutoTrader("# High Ask: $" + highAsk,currCoin);
-	//sayGdaxAutoTrader("# Low Ask: $" + lowAsk,currCoin);
-	//sayGdaxAutoTrader("# High Bid: $" + highBid,currCoin);
-	//sayGdaxAutoTrader("# Low Bid: $" + lowBid,currCoin);
-	//sayGdaxAutoTrader("# High: $" + highPrice,currCoin);
-	//sayGdaxAutoTrader("# Low: $" + lowPrice,currCoin);
-	// determine stuff like price/ask/bid
-	//sayGdaxAutoTrader("# Price: $" + curPrice,currCoin );
-	//sayGdaxAutoTrader("# Ask: $" + curAsk,currCoin );
-	//sayGdaxAutoTrader("# Bid: $" + curBid,currCoin );
-	//sayGdaxAutoTrader("# minUSDBuy: $" + QString().setNum(mMinUSDBuyAmount),currCoin );
-	//sayGdaxAutoTrader("# minCryptoBuy: " + QString().setNum(mMinCryptoBuyAmount),currCoin );
-	//sayGdaxAutoTrader("# Available: " + USDBalance,currCoin);
-	//if ( USDBalance.toDouble() < mMinUSDBuyAmount  ) {
-	//	sayGdaxAutoTrader("# Available $USD too low (< $"+QString().setNum(mMinUSDBuyAmount)+")",currCoin);
-	//	continue;
-	//}
-	//QString howMuchToSpend("0.00");
-	//if ( USDBalance.toDouble() > mMaxUSDBuyAmount && ((mMaxUSDBuyAmount) / curBid.toDouble()) > mMinCryptoBuyAmount )  {
-	//	howMuchToSpend = QString().setNum(mMaxUSDBuyAmount - (mMaxUSDBuyAmount * 0.005));
-	//} else if ( USDBalance.toDouble() < mMaxUSDBuyAmount && USDBalance.toDouble() >= mMinUSDBuyAmount && ((USDBalance.toDouble()) / curBid.toDouble()) > mMinCryptoBuyAmount )  {
-	//	howMuchToSpend = QString().setNum(USDBalance.toDouble() - (USDBalance.toDouble() * 0.005));
-	//} else {
-	//	sayGdaxAutoTrader("# Available $USD too low For MinCryptoBuy(< "+QString().setNum(mMinCryptoBuyAmount)+")",currCoin);
-	//	break;
-	//}
-	////shave off more than .00
-	//if ( howMuchToSpend.indexOf(".",0) != -1 ) {
-	//	//it has at least one deci
-	//	QString pre=howMuchToSpend.mid(0,howMuchToSpend.indexOf(".",0));
-	//	QString post= howMuchToSpend.mid(howMuchToSpend.indexOf(".",0)+1,2);
-	//	howMuchToSpend = pre + "." + post;
-	//}
-	//sayGdaxAutoTrader("Can Buy " + QString().setNum(howMuchToSpend.toDouble() / curBid.toDouble()) + " Of " + currCoin + " for $" + howMuchToSpend,currCoin );
-	//sayGdaxAutoTrader("# Allocated $" + howMuchToSpend +" For " + currCoin,currCoin);
-	//sayGdaxAutoTrader("#################",currCoin);
-	//sayGdaxAutoTrader("# Analyzing Price History",currCoin);
-	//sayGdaxAutoTrader("# Coin: " + currCoin,currCoin);
-	// NOW FIND THE BUFFER ZONE
-
+func (b *BitProphetBot) ChatSay(text string) {
+	b.AutoSuggestChannel <- &bpServiceEvent{
+		Time:      time.Now(),
+		EventType: "AUTO_SUGGEST",
+		EventData: text,
+	}
 }
