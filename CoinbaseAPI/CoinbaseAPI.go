@@ -40,7 +40,7 @@ func NewSecureRequest(RequestName string, version string) *SecureRequest {
 }
 
 type CoinbaseCredentials struct {
-	// PRIVATE! NEVER EXPOSE!
+	// PRIVATE! NEVER EXPOSE!!
 	Key        string
 	Passphrase string
 	Secret     string
