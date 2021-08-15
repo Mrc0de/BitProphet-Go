@@ -72,7 +72,8 @@ func (b *BitProphetBot) Run() {
 		EventData: "[BitProphetBot::Run] Started Bot",
 	}
 	autoSuggestTicker := time.NewTicker(60 * time.Second)
-	checkBuyFillsTicker := time.NewTicker(90 * time.Second)
+	checkBuyFillsTicker := time.NewTicker(80 * time.Second)
+	checkSellFillsTicker := time.NewTicker(100 * time.Second)
 	for {
 		select {
 		case <-autoSuggestTicker.C:
@@ -82,6 +83,10 @@ func (b *BitProphetBot) Run() {
 		case <-checkBuyFillsTicker.C:
 			{
 				b.CheckBuyFills()
+			}
+		case <-checkSellFillsTicker.C:
+			{
+				b.CheckSellFills()
 			}
 		}
 	}
@@ -383,7 +388,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 				logger.Printf("[CheckBuyFills] ----\t----\t----\t----\r\n")
 				continue
 			}
-			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SellOrderID=? WHERE BuyOrderID=?`, resp.Status, jresp.ID, resp.ID)
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SellOrderID=?,Type=? WHERE BuyOrderID=?`, jresp.Status, jresp.ID, "sell", resp.ID)
 			if err != nil {
 				logger.Printf("[CheckBuyFills] DB Update ERROR: %s", err)
 				return
@@ -394,7 +399,46 @@ func (b *BitProphetBot) CheckBuyFills() {
 }
 
 func (b *BitProphetBot) CheckSellFills() {
-
+	fills := []BitProphetLedgerRecord{}
+	rows, err := LocalDB.Query(`SELECT ID,Market,Type,Cost,Price,CoinAmount,BuyFee,ProjectedSellFee,SellPrice,SellOrderID,Status,Time FROM Ledger WHERE
+										TimeSold IS NULL AND Type='sell'`)
+	if err != nil {
+		logger.Printf("[CheckSellFills] DB Error: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		f := BitProphetLedgerRecord{}
+		err = rows.Scan(&f.ID, &f.Market, &f.Type, &f.Cost, &f.Price, &f.CoinAmount, &f.BuyFee, &f.ProjectedSellFee, &f.SellPrice, &f.SellOrderID, &f.Status, &f.Time)
+		if err != nil {
+			logger.Printf("[CheckSellFills] DB Scan Error: %s", err)
+			return
+		}
+		fills = append(fills, f)
+	}
+	logger.Printf("[CheckSellFills] Found %d Pending Sell Orders in Ledger", len(fills))
+	for _, f := range fills {
+		logger.Printf("[CheckSellFills] Found [%s] \t[%s] [%.8f] [SellPrice: $%.2f]", f.SellOrderID.String, f.Market.String, f.CoinAmount.Float64, f.SellPrice.Float64)
+		req := api.NewSecureRequest("get_order", Config.CBVersion) // create the req
+		req.Credentials.Key = Config.BPInternalAccount.AccessKey   // setup it's creds
+		req.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
+		req.Credentials.Secret = Config.BPInternalAccount.Secret
+		req.Url += f.SellOrderID.String
+		reply, err := req.Process(logger)
+		if err != nil {
+			logger.Printf("[CheckSellFills] ERROR: %s", err)
+			return
+		}
+		resp := CoinbaseOrderResponse{}
+		err = json.Unmarshal(reply, &resp)
+		if err != nil {
+			logger.Printf("[CheckSellFills] UnMarshall ERROR: %s", err)
+			return
+		}
+		if resp.Settled {
+			logger.Printf("[CheckSellFills] [Settled Sell] [%s] \t[%s] [%s] [%.8f] [SellPrice: $%.2f]", resp.ID, resp.Status, resp.ProductId, resp.Size, resp.SpecifiedFunds)
+		}
+	}
 }
 
 func (b *BitProphetBot) ChatSay(text string) {
