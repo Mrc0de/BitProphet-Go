@@ -289,8 +289,8 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
-		logger.Printf("[AUTO_SUGGEST] Purchased %s of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount)
-		b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Purchased %s of %s for %d, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount))
+		logger.Printf("[AUTO_SUGGEST] Purchased %s of %s for %s, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount)
+		b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Purchased %s of %s for %s, Sell at price: %s", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount))
 	}
 }
 
