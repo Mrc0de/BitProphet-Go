@@ -50,6 +50,7 @@ type BitProphetLedgerRecord struct {
 	Status           sql.NullString  `json:"status"`
 	FilledBuy        sql.NullBool    `json:"filled_buy"`
 	FilledSell       sql.NullBool    `json:"filled_sell"`
+	SoldValue        sql.NullFloat64 `json:"sold_value"`
 }
 
 type BitProphetBot struct {
@@ -393,7 +394,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 				logger.Printf("[CheckBuyFills] DB Update ERROR: %s", err)
 				return
 			}
-			b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Placed Sell %s %.8f for $%.2f", f.Market.String, f.CoinAmount.Float64, f.SellPrice.Float64))
+			b.ChatSay(fmt.Sprintf("[CheckBuyFills] Placed Sell %s %.8f for $%.2f", f.Market.String, f.CoinAmount.Float64, f.SellPrice.Float64))
 		}
 	}
 }
@@ -418,7 +419,7 @@ func (b *BitProphetBot) CheckSellFills() {
 	}
 	logger.Printf("[CheckSellFills] Found %d Pending Sell Orders in Ledger", len(fills))
 	for _, f := range fills {
-		logger.Printf("[CheckSellFills] Found [%s] \t[%s] [%.8f] [SellPrice: $%.2f]", f.SellOrderID.String, f.Market.String, f.CoinAmount.Float64, f.SellPrice.Float64)
+		logger.Printf("[CheckSellFills] Found [%s] [%s] [%.8f] [SellPrice: $%.2f]", f.SellOrderID.String, f.Market.String, f.CoinAmount.Float64, f.SellPrice.Float64)
 		req := api.NewSecureRequest("get_order", Config.CBVersion) // create the req
 		req.Credentials.Key = Config.BPInternalAccount.AccessKey   // setup it's creds
 		req.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
@@ -436,8 +437,14 @@ func (b *BitProphetBot) CheckSellFills() {
 			return
 		}
 		if resp.Settled {
-			logger.Printf("[CheckSellFills] [Settled Sell] [%s] \t[%s] [%s] [%s] [SellPrice: %s]", resp.ID, resp.Status, resp.ProductId, resp.Size, resp.ExecutedValue)
-			logger.Printf("[CheckSellFills] [Settled Sell] %v", resp)
+			logger.Printf("[CheckSellFills] [Settled Sell] [%s] [%s] [%s] [%s] [SellPrice: %s] [DoneAt: %s]", resp.ID, resp.Status, resp.ProductId, resp.Size, resp.ExecutedValue, resp.DoneAt.String())
+			// update the database to make it stop checkin this one
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SoldValue=?,TimeSold=?,FilledSell=?,SellFee=? WHERE SellOrderID=?`, resp.Status, resp.ExecutedValue, resp.DoneAt, true, resp.FillFees, resp.ID)
+			if err != nil {
+				logger.Printf("[CheckSellFills] DB Error: %s", err)
+				return
+			}
+			b.ChatSay(fmt.Sprintf("[CheckSellFills] [Settled Sell] [%s %s] [SellValue: %s]", resp.Size, resp.ProductId, resp.ExecutedValue))
 		}
 	}
 }
