@@ -126,6 +126,10 @@ func UrlForRequestName(name string) string {
 		{
 			return "/reports/:" // :reportid <-- supply this part
 		}
+	case "place_order":
+		{
+			return "/orders" // POST
+		}
 	default:
 		{
 			return ""
@@ -198,7 +202,6 @@ func (s *SecureRequest) Process(logger *log.Logger) ([]byte, error) {
 	if logger != nil {
 		//logger.Printf("[SecureRequest::Process] ENCODED MSG Size: %d", len(shaEnc))
 	}
-
 	c := &http.Client{}
 	re, err := c.Do(req)
 	if err != nil {

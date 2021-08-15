@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -23,6 +25,7 @@ type Configuration struct {
 		User     string `yaml:"user"`
 		Pass     string `yaml:"pass"`
 		Database string `yaml:"database"`
+		DSN      string
 	} `yaml:"bpdata"`
 	BitProphetServiceClient struct { // Connects to Coinbase and Influx
 		DefaultSubscriptions []string `yaml:"defaultsubscriptions"`
@@ -75,5 +78,9 @@ func (s *Configuration) load(confFile string) error {
 		logger.Printf("Internal Account Enabled: %t", s.BPInternalAccount.Enabled)
 		logger.Printf("BitProphet DBHost: %s", s.BPData.Host)
 	}
+	if len(s.BPData.Host) < 1 {
+		return errors.New("BPDATA Host is required!")
+	}
+	s.BPData.DSN = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", s.BPData.User, s.BPData.Pass, s.BPData.Host, s.BPData.Database)
 	return nil
 }

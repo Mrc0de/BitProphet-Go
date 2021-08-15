@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"os"
 	"os/signal"
@@ -25,6 +27,7 @@ var (
 	Config     Configuration
 	logger     *log.Logger
 	WebService *httpService
+	LocalDB    *sql.DB
 
 	// Channels
 	DebugChannel  chan string
@@ -66,10 +69,18 @@ func main() {
 	signal.Notify(quitKey, os.Interrupt)
 	mainQuit := false
 	// Start up Backend Service (BitProphetService)
+	LocalDB, err = sql.Open("mysql", Config.BPData.DSN)
+	if err != nil {
+		panic(err)
+	}
+	defer LocalDB.Close()
+	err = LocalDB.Ping()
+	if err != nil {
+		panic(err)
+	}
 	BitProphet := CreateBPService()
 	go BitProphet.Run()
 	first := true
-
 	// Loop
 	for {
 		select {

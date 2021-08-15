@@ -178,6 +178,32 @@ func (b *BitProphetBot) AutoSuggest() {
 			"[Profit: $%.2f] [SellPrice: $%.2f]!", coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee,
 			willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount))
 		logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
+		// Buy
+		breq := api.NewSecureRequest("place_order", Config.CBVersion) // create the req
+		breq.Credentials.Key = Config.BPInternalAccount.AccessKey     // setup it's creds
+		breq.Credentials.Passphrase = Config.BPInternalAccount.PassPhrase
+		breq.Credentials.Secret = Config.BPInternalAccount.Secret
+		breq.RequestMethod = "POST"
+		var buy struct {
+			Size   float64 `json:"size"`
+			Price  float64 `json:"price"`
+			Side   string  `json:"side"`
+			Market string  `json:"product_id"`
+		}
+		buy.Size = willBuyCoinAmount
+		buy.Price = coinAsk
+		buy.Side = "buy"
+		buy.Market = m
+		rbody, err := json.Marshal(buy)
+		if err != nil {
+			logger.Printf("[AutoSuggest] Buy Error: %s", err)
+		}
+		breq.RequestBody = string(rbody)
+		bresp, err := breq.Process(logger) // process request
+		if err != nil {
+			logger.Printf("[AutoSuggest] Buy Request Error: %s", err)
+		}
+		logger.Printf("[AUTOSUGGEST] \t %v", bresp)
 	}
 }
 
