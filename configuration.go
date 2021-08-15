@@ -81,6 +81,6 @@ func (s *Configuration) load(confFile string) error {
 	if len(s.BPData.Host) < 1 {
 		return errors.New("BPDATA Host is required!")
 	}
-	s.BPData.DSN = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", s.BPData.User, s.BPData.Pass, s.BPData.Host, s.BPData.Database)
+	s.BPData.DSN = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", s.BPData.User, s.BPData.Pass, s.BPData.Host, s.BPData.Database)
 	return nil
 }
