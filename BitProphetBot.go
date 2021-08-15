@@ -203,7 +203,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		if err != nil {
 			logger.Printf("[AutoSuggest] Buy Request Error: %s", err)
 		}
-		logger.Printf("[AUTOSUGGEST] \t %v", bresp)
+		logger.Printf("[AUTOSUGGEST] \t %s", bresp)
 	}
 }
 
