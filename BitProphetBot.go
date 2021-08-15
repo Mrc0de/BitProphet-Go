@@ -91,13 +91,13 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		if availCash < minPriceBuy {
 			logger.Printf("[AutoSuggest] Not Enough Available %s, Aborting.", NativeAcc.Currency)
-			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n\r\n")
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n \r\n")
 			continue
 		}
 		logger.Printf("[AutoSuggest] MaxBuy: $%.2f", Config.BotDefaults.MaxUSDBuy)
 		if minPriceBuy > Config.BotDefaults.MaxUSDBuy {
 			logger.Printf("[AutoSuggest] MinPrice is more than MaxBuy, Aborting.")
-			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n\r\n")
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n \r\n")
 			continue
 		}
 		// We have enough to minimum buy....
@@ -125,7 +125,7 @@ func (b *BitProphetBot) AutoSuggest() {
 			willBuyCoinAmount = willSpend / coinAsk
 			if willSpendWithBuyFee > availCash {
 				logger.Printf("[AutoSuggest] Available Balance less than $%.2f, Aborting.", willSpendWithBuyFee)
-				logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n\r\n")
+				logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n \r\n")
 				continue
 			}
 		}
@@ -155,7 +155,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		logger.Printf("[AutoSuggest] Buy Zone: $%.2f - $%.2f", zoneFloor, zoneRoof)
 		if coinAsk < zoneFloor || coinAsk > zoneRoof {
 			logger.Printf("[AutoSuggest] Ask Price $%.2f outside of Buy Zone, ABORTED.", coinAsk)
-			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n\r\n")
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n \r\n")
 			continue
 		}
 		logger.Printf("[AutoSuggest] Ask Price $%.2f is within the Buy Zone.", coinAsk)
@@ -169,7 +169,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		if willSellFor-sellFee-willSpendWithBuyFee < 0.01 || willSellFor/willBuyCoinAmount < pr.MaxPrice {
 			// less than 1 cent of profit... PASS, no thanks
 			logger.Printf("[AutoSuggest] NO PROFIT = NO BUY [PASS on Buying %s]", m[:strings.Index(m, "-")])
-			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n\r\n")
+			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n \r\n")
 			continue
 		}
 		b.AutoSuggestChannel <- &bpServiceEvent{
@@ -179,7 +179,7 @@ func (b *BitProphetBot) AutoSuggest() {
 				"[Profit: $%.2f] [SellPrice: $%.2f]!", coinAsk, willSpendWithBuyFee, profitNeeded, willSellFor, sellFee,
 				willSellFor-sellFee-willSpendWithBuyFee, willSellFor/willBuyCoinAmount),
 		}
-		logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n\r\n")
+		logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n \r\n")
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////
