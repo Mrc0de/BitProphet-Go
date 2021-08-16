@@ -106,8 +106,8 @@ func InternalUserStats(w http.ResponseWriter, r *http.Request) {
 
 	//logger.Printf("[InternalUserStats] Found %d Accounts", len(accList))
 	var relevantAccounts []api.CoinbaseAccount
+	natDone := false
 	for _, coin := range Config.BPInternalAccount.DefaultCoins {
-		natDone := false
 		for _, acc := range accList {
 			if acc.Currency == coin || acc.Currency == Config.BPInternalAccount.NativeCurrency {
 				if acc.Currency == Config.BPInternalAccount.NativeCurrency {
