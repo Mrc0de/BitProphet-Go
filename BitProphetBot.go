@@ -131,7 +131,7 @@ func (b *BitProphetBot) AutoSuggest() {
 	// Now we know our hard limit for spending (our native currency's available balance)
 	// Config.BotDefaults.MinCryptoBuy * CoinPrice = Minimum Spend Amount BEFORE FEES
 	/////////////////////////////////////////////////////////////////////////////////
-	for _, m := range Config.BotDefaults.Markets {
+	for y, m := range Config.BotDefaults.Markets {
 		coinAsk := b.ParentService.CoinPricesNow[m].Ask
 		coin := b.ParentService.CoinPricesNow[m].Market
 		minPriceBuy := coinAsk * Config.BotDefaults.MinCryptoBuy
@@ -250,7 +250,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		buy.Side = "buy"
 		buy.Market = m
-		buy.Size = fmt.Sprintf("%.1f", willBuyCoinAmount)
+		buy.Size = fmt.Sprintf(Config.BotDefaults.QuoteIncrements[y], willBuyCoinAmount)
 		buy.Price = fmt.Sprintf("%.2f", coinAsk)
 
 		rbody, err := json.Marshal(buy)
@@ -323,7 +323,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 		fills = append(fills, f)
 	}
 	logger.Printf("[CheckBuyFills] Found %d Pending Buy Orders in Ledger", len(fills))
-	for _, f := range fills {
+	for z, f := range fills {
 		// may need to limit this, I think 8 per some_interval is the maximum and there is no batch check (/fills endpoint isnt what I want)
 		req := api.NewSecureRequest("get_order", Config.CBVersion) // create the req
 		req.Credentials.Key = Config.BPInternalAccount.AccessKey   // setup it's creds
@@ -365,7 +365,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 			}
 			sell.Side = "sell"
 			sell.Market = f.Market.String
-			sell.Size = fmt.Sprintf("%.8f", f.CoinAmount.Float64)
+			sell.Size = fmt.Sprintf(Config.BotDefaults.QuoteIncrements[z], f.CoinAmount.Float64)
 			sell.Price = fmt.Sprintf("%.2f", f.SellPrice.Float64)
 
 			sbody, err := json.Marshal(sell)

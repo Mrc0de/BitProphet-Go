@@ -46,6 +46,7 @@ type Configuration struct {
 		MaxUSDBuy        float64  `yaml:"max_usd_buy"`
 		FeePercent       float64  `yaml:"fee_percent"` // 0.50% of native currency amount
 		Markets          []string `yaml:"markets"`
+		QuoteIncrements  []string `yaml:"quote_increments"`
 	} `yaml:"bot_defaults"`
 }
 

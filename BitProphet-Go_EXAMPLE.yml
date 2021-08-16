@@ -32,6 +32,7 @@ bot_defaults:
   min_percent_profit: 1.5
   max_usd_buy: 50.00
   fee_percent: 0.5
-  markets: ["LTC-USD"]
+  markets: ["LTC-USD","DOGE-USD"]
+  quote_increments: ["%.8f","%.2f"]
 
 cbversion: 2016-03-03
