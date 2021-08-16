@@ -67,7 +67,7 @@
             <div class="col" id="BTChartBox"></div>
         </div>
         <div id="ETHTickerBox" class="mr-1 col" style="border: black thin solid; color:white; background-color: black;">
-            ETH-USD</br>
+            DOGE-USD</br>
             Price <span id="ETHTicker_Price" class="badge badge-light"></span>
             Ask <span id="ETHTicker_BestAsk" class="badge badge-light"></span>
             Bid <span id="ETHTicker_BestBid" class="badge badge-light"></span>
@@ -306,7 +306,7 @@
             useUTC: false
         },
         title: {
-            text: 'ETH-USD'
+            text: 'DOGE-USD'
         },
         credits: {
             enabled: false
@@ -336,7 +336,7 @@
             enabled: false
         },
         series: [{
-            name: 'ETH-USD',
+            name: 'DOGE-USD',
             data: null,
         }]
     });
@@ -381,11 +381,11 @@
             // subscribe our three primary tickers
             sock.send(JSON.stringify({
                 "type": "subscribe",
-                "product_ids": [ "BTC-USD","ETH-USD","LTC-USD"],
+                "product_ids": [ "BTC-USD","DOGE-USD","LTC-USD"],
                 "channels": [
                     {
                         "name": "ticker",
-                        "product_ids": [ "BTC-USD","ETH-USD","LTC-USD" ]
+                        "product_ids": [ "BTC-USD","DOGE-USD","LTC-USD" ]
                     }
                 ]
             }));
@@ -402,7 +402,7 @@
                     let shifter = false;
                     if (BTCChart.pointCount > 75) { shifter = true; }
                     BTCChart.series[0].addPoint([(new Date()).getTime(),parseFloat(obj.price)], true, shifter,!shifter);
-                } else if (obj.type === "ticker" && obj.product_id === "ETH-USD") {
+                } else if (obj.type === "ticker" && obj.product_id === "DOGE-USD") {
                     $("#ETHTicker_Price").html(obj.price);
                     $("#ETHTicker_BestAsk").html(obj.best_ask);
                     $("#ETHTicker_BestBid").html(obj.best_bid);

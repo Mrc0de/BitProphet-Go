@@ -158,7 +158,11 @@ func (b *BitProphetBot) AutoSuggest() {
 		// but instead we will buy UP TO maxBuy OR just min...
 		if availCash <= Config.BotDefaults.MaxUSDBuy {
 			// we cant buy up to max, just go with min
-			willSpend = minPriceBuy
+			if availCash > minPriceBuy {
+				willSpend = availCash - (availCash * Config.BotDefaults.FeePercent * 0.01)
+			} else {
+				willSpend = minPriceBuy
+			}
 		} else {
 			// we can buy up to max, do it
 			willSpend = Config.BotDefaults.MaxUSDBuy
