@@ -250,7 +250,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		buy.Side = "buy"
 		buy.Market = m
-		buy.Size = fmt.Sprintf("%.8f", willBuyCoinAmount)
+		buy.Size = fmt.Sprintf("%.1f", willBuyCoinAmount)
 		buy.Price = fmt.Sprintf("%.2f", coinAsk)
 
 		rbody, err := json.Marshal(buy)
