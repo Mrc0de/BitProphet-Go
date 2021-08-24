@@ -57,6 +57,7 @@ type BitProphetBot struct {
 	ServiceChannel     chan *bpServiceEvent
 	AutoSuggestChannel chan *bpServiceEvent // text only (debug)
 	ParentService      *bpService
+	SkipBuyTicks       int
 }
 
 func CreateBitProphetBot() *BitProphetBot {
@@ -79,7 +80,11 @@ func (b *BitProphetBot) Run() {
 		select {
 		case <-autoSuggestTicker.C:
 			{
-				b.AutoSuggest()
+				if b.SkipBuyTicks > 0 {
+					b.SkipBuyTicks--
+				} else {
+					b.AutoSuggest()
+				}
 			}
 		case <-checkBuyFillsTicker.C:
 			{
@@ -209,7 +214,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		// find BUFFERZONE CEILING (BELOW 15% of gap below ceiling)
 		gap := pr.MaxPrice - pr.MinPrice
 		zoneFloor := (gap * 0.05) + pr.MinPrice
-		zoneRoof := pr.MaxPrice - (gap * 0.15)
+		zoneRoof := pr.MaxPrice - (gap * 0.20)
 		logger.Printf("[AutoSuggest] Buy Zone: $%.2f - $%.2f", zoneFloor, zoneRoof)
 		b.ChatSay(fmt.Sprintf("[AutoSuggest] Buy Zone: $%.2f - $%.2f", zoneFloor, zoneRoof))
 		if coinAsk < zoneFloor || coinAsk > zoneRoof {
@@ -299,6 +304,7 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
+		b.SkipBuyTicks = 10 // skip next ten minutes (1min each)
 		logger.Printf("[AUTO_SUGGEST] Purchased %s of %s for %s, Sell at price: %.2f", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount)
 		b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Purchased %s of %s for %s, Sell at price: %.2f", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount))
 	}
@@ -448,6 +454,7 @@ func (b *BitProphetBot) CheckSellFills() {
 				logger.Printf("[CheckSellFills] DB Error: %s", err)
 				return
 			}
+			b.SkipBuyTicks = 10 // skip next ten minutes (1min each)
 			b.ChatSay(fmt.Sprintf("[CheckSellFills] [Settled Sell] [%s %s] [SellValue: %s]", resp.Size, resp.ProductId, resp.ExecutedValue))
 		}
 	}
