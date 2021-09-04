@@ -297,7 +297,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		}
 		logger.Printf("[AUTOSUGGEST] \t %v", jresp)
 		_, err = LocalDB.Exec(`INSERT INTO Ledger (ID,Market,Type,Cost,Price,CoinAmount,BuyFee,ProjectedSellFee,SellPrice,Time,BuyOrderID,Status,BuyResponse) VALUES(
-                              ?,?,?,?,?,?,?,?,?,?,?,?)`, u, m, "buy", willSpendWithBuyFee, buy.Price, buy.Size, buyFee, sellFee, willSellFor/willBuyCoinAmount,
+                              ?,?,?,?,?,?,?,?,?,?,?,?,?)`, u, m, "buy", willSpendWithBuyFee, buy.Price, buy.Size, buyFee, sellFee, willSellFor/willBuyCoinAmount,
 			time.Now(), jresp.ID, jresp.Status, fmt.Sprintf("%s", bresp))
 		if err != nil {
 			logger.Printf("[AutoSuggest] DB INSERT Error: %s", err)
