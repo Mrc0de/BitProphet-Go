@@ -7,10 +7,9 @@
             );
             padding: 0;
             display: flex;
-            color: white;
+            color: black;
             font: 1rem Inconsolata, monospace;
             /*text-shadow: 0 0 5px #C8C8C8;*/
-            height:100vh;
         }
 
         #BitProphet-GoHomePage {
@@ -47,7 +46,16 @@
         .tickerbox {
             border: black thin solid;
             color:white;
+            background-color: transparent;
+        }
+        .tickerText {
             background-color: black;
+        }
+
+        .tickerText > span {
+            color: red;
+            margin-left: 1em;
+            margin-right: 1em;
         }
     </style>
 {{end}}
@@ -65,35 +73,35 @@
 <div class="d-flex row m-0 col-12">
     <div class="row m-0 col-12 justify-content-between">
         <div id="BTCTickerBox" class="col-4 tickerbox">
-            <div class="row m-0 col-12">BTC-USD</div>
-            <div class="row m-0 col-12">
-                Price <span id="BTCTicker_Price" class="badge badge-light"></span>
-                Ask <span id="BTCTicker_BestAsk" class="badge badge-light"></span>
-                Bid <span id="BTCTicker_BestBid" class="badge badge-light"></span>
+            <div class="row m-0 col-12 tickerText p-0">BTC-USD</div>
+            <div class="row m-0 col-12 tickerText p-0">
+                Price <span id="BTCTicker_Price" ></span>
+                Ask <span id="BTCTicker_BestAsk" ></span>
+                Bid <span id="BTCTicker_BestBid" ></span>
             </div>
-            <div class="row m-0 col-12" id="BTChartBox"></div>
+            <div class="row m-0 col-12 p-0" id="BTChartBox"></div>
         </div>
         <div id="ETHTickerBox" class="col-4 tickerbox">
-            <div class="row m-0 col-12">ETH-USD</div>
-            <div class="row m-0 col-12">
-                Price <span id="ETHTicker_Price" class="badge badge-light"></span>
-                Ask <span id="ETHTicker_BestAsk" class="badge badge-light"></span>
-                Bid <span id="ETHTicker_BestBid" class="badge badge-light"></span>
+            <div class="row m-0 col-12 tickerText p-0">ETH-USD</div>
+            <div class="row m-0 col-12 tickerText p-0">
+                Price <span id="ETHTicker_Price" ></span>
+                Ask <span id="ETHTicker_BestAsk" ></span>
+                Bid <span id="ETHTicker_BestBid" ></span>
             </div>
-            <div class="row m-0 col-12" id="ETHChartBox"></div>
+            <div class="row m-0 col-12 p-0" id="ETHChartBox"></div>
         </div>
         <div id="LTCTickerBox" class="col-4 tickerbox">
-            <div class="row m-0 col-12">LTC-USD</div>
-            <div class="row m-0 col-12">
-                Price <span id="LTCTicker_Price" class="badge badge-light"></span>
-                Ask <span id="LTCTicker_BestAsk" class="badge badge-light"></span>
-                Bid <span id="LTCTicker_BestBid" class="badge badge-light"></span>
+            <div class="row m-0 col-12 tickerText p-0">LTC-USD</div>
+            <div class="row m-0 col-12 tickerText p-0">
+                Price <span id="LTCTicker_Price"></span>
+                Ask <span id="LTCTicker_BestAsk"></span>
+                Bid <span id="LTCTicker_BestBid"></span>
             </div>
-            <div class="row m-0 col-12" id="LTCChartBox"></div>
+            <div class="row m-0 col-12 p-0" id="LTCChartBox"></div>
         </div>
     </div>
 
-    <div class="row p-0 m-0 col-12">
+    <div class="row m-0 col-12">
         <div id="BitProphet-GoHomePage" class="col-12">
             <div id="bpTitleBar" class="col">
                 BitProphet-Go
