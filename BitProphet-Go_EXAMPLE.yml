@@ -34,5 +34,7 @@ bot_defaults:
   fee_percent: 0.5
   markets: ["LTC-USD","DOGE-USD"]
   quote_increments: ["%.8f","%.2f"]
+  skip_ticks_on_buy: 15
+  skip_ticks_on_sell: 30
 
 cbversion: 2016-03-03

@@ -47,6 +47,8 @@ type Configuration struct {
 		FeePercent       float64  `yaml:"fee_percent"` // 0.50% of native currency amount
 		Markets          []string `yaml:"markets"`
 		QuoteIncrements  []string `yaml:"quote_increments"`
+		SkipTicksOnBuy   int      `yaml:"skip_ticks_on_buy"`
+		SkipTicksOnSell  int      `yaml:"skip_ticks_on_sell"`
 	} `yaml:"bot_defaults"`
 }
 

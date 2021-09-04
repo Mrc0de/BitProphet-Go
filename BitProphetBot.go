@@ -304,7 +304,7 @@ func (b *BitProphetBot) AutoSuggest() {
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
 			continue
 		}
-		b.SkipBuyTicks = 10 // skip next ten minutes (1min each)
+		b.SkipBuyTicks = Config.BotDefaults.SkipTicksOnBuy // skip next X minutes (1min each)
 		logger.Printf("[AUTO_SUGGEST] Purchased %s of %s for %s, Sell at price: %.2f", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount)
 		b.ChatSay(fmt.Sprintf("[AUTO_SUGGEST] Purchased %s of %s for %s, Sell at price: %.2f", buy.Size, m, buy.Price, willSellFor/willBuyCoinAmount))
 	}
@@ -461,7 +461,7 @@ func (b *BitProphetBot) CheckSellFills() {
 				logger.Printf("[CheckSellFills] DB Error: %s", err)
 				return
 			}
-			b.SkipBuyTicks = 10 // skip next ten minutes (1min each)
+			b.SkipBuyTicks = Config.BotDefaults.SkipTicksOnSell // skip next X minutes (1min each)
 			b.ChatSay(fmt.Sprintf("[CheckSellFills] [Settled Sell] [%s %s] [SellValue: %s]", resp.Size, resp.ProductId, resp.ExecutedValue))
 		}
 	}
