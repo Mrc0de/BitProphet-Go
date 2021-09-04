@@ -296,9 +296,9 @@ func (b *BitProphetBot) AutoSuggest() {
 			continue
 		}
 		logger.Printf("[AUTOSUGGEST] \t %v", jresp)
-		_, err = LocalDB.Exec(`INSERT INTO Ledger (ID,Market,Type,Cost,Price,CoinAmount,BuyFee,ProjectedSellFee,SellPrice,Time,BuyOrderID,Status) VALUES(
+		_, err = LocalDB.Exec(`INSERT INTO Ledger (ID,Market,Type,Cost,Price,CoinAmount,BuyFee,ProjectedSellFee,SellPrice,Time,BuyOrderID,Status,BuyResponse) VALUES(
                               ?,?,?,?,?,?,?,?,?,?,?,?)`, u, m, "buy", willSpendWithBuyFee, buy.Price, buy.Size, buyFee, sellFee, willSellFor/willBuyCoinAmount,
-			time.Now(), jresp.ID, jresp.Status)
+			time.Now(), jresp.ID, jresp.Status, fmt.Sprintf("%s", bresp))
 		if err != nil {
 			logger.Printf("[AutoSuggest] DB INSERT Error: %s", err)
 			logger.Printf("[AutoSuggest] ----\t----\t----\t----\r\n")
@@ -351,11 +351,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 			logger.Printf("[CheckBuyFills] Found Buy Fill: %s %s [%s]", resp.ID, resp.ProductId, resp.Status)
 			f.FilledBuy.Bool = true
 			f.FilledBuy.Valid = true
-			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,FilledBuy=? WHERE BuyOrderID=?`, resp.Status, true, resp.ID) // this update indicates the fill
-			if err != nil {
-				logger.Printf("[CheckBuyFills] DB Update ERROR: %s", err)
-				return
-			}
+
 			// Lets try to place it for sale at saleprice
 			// sell
 			sreq := api.NewSecureRequest("place_order", Config.CBVersion) // create the req
@@ -399,7 +395,18 @@ func (b *BitProphetBot) CheckBuyFills() {
 				logger.Printf("[CheckBuyFills] ----\t----\t----\t----\r\n")
 				continue
 			}
-			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SellOrderID=?,Type=? WHERE BuyOrderID=?`, jresp.Status, jresp.ID, "sell", resp.ID)
+			// we only update the ledger when we no longer wish to keep checking it
+			// if we had an error on the sell, we dont want to stop checking it or it gets stuck in our wallet unaccounted for (never gets sold)
+			// this anomoly can be beneficial OR disasterous
+			// Prevent it entirely, by never marking it as a filled buy until it can be sold
+			// we also log the resp now, so we can analyze the fail reason and prevent that too (its likely a rounding error on our part or a race/temp failure)
+			// this change ensures that we will always sell the coin off at at least the determined sell price (good enough for now)
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,FilledBuy=? WHERE BuyOrderID=?`, resp.Status, true, resp.ID) // this update indicates the fill
+			if err != nil {
+				logger.Printf("[CheckBuyFills] DB Update ERROR: %s", err)
+				return
+			}
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SellOrderID=?,Type=?,SellResponse=? WHERE BuyOrderID=?`, jresp.Status, jresp.ID, "sell", fmt.Sprintf("%s", sresp), resp.ID)
 			if err != nil {
 				logger.Printf("[CheckBuyFills] DB Update ERROR: %s", err)
 				return
@@ -449,7 +456,7 @@ func (b *BitProphetBot) CheckSellFills() {
 		if resp.Settled {
 			logger.Printf("[CheckSellFills] [Settled Sell] [%s] [%s] [%s] [%s] [SellPrice: %s] [DoneAt: %s]", resp.ID, resp.Status, resp.ProductId, resp.Size, resp.ExecutedValue, resp.DoneAt.String())
 			// update the database to make it stop checkin this one
-			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SoldValue=?,TimeSold=?,FilledSell=?,SellFee=? WHERE SellOrderID=?`, resp.Status, resp.ExecutedValue, resp.DoneAt, true, resp.FillFees, resp.ID)
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SoldValue=?,TimeSold=?,FilledSell=?,SellFee=?,LastStatusResp WHERE SellOrderID=?`, resp.Status, resp.ExecutedValue, resp.DoneAt, true, resp.FillFees, fmt.Sprintf("%s", reply), resp.ID)
 			if err != nil {
 				logger.Printf("[CheckSellFills] DB Error: %s", err)
 				return
