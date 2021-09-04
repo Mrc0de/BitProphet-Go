@@ -44,6 +44,11 @@
         textarea{
             resize: none !important;
         }
+        .tickerbox {
+            border: black thin solid;
+            color:white;
+            background-color: black;
+        }
     </style>
 {{end}}
 
@@ -57,28 +62,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0-0/axios.js"></script>
 
 
-<div class="col-12">
-    <div class="row p-0 m-0 col-12">
-        <div id="BTCTickerBox" class="mr-1 col" style="border: black thin solid; color:white; background-color: black;">
-            BTC-USD</br>
-            Price <span id="BTCTicker_Price" class="badge badge-light"></span>
-            Ask <span id="BTCTicker_BestAsk" class="badge badge-light"></span>
-            Bid <span id="BTCTicker_BestBid" class="badge badge-light"></span>
-            <div class="col" id="BTChartBox"></div>
+<div class="d-flex row m-0 col-12">
+    <div class="row m-0 col-12 justify-content-between">
+        <div id="BTCTickerBox" class="col tickerbox">
+            <div class="row m-0 col-12">BTC-USD</div>
+            <div class="row m-0 col-12">
+                Price <span id="BTCTicker_Price" class="badge badge-light"></span>
+                Ask <span id="BTCTicker_BestAsk" class="badge badge-light"></span>
+                Bid <span id="BTCTicker_BestBid" class="badge badge-light"></span>
+            </div>
+            <div class="row m-0 col-12" id="BTChartBox"></div>
         </div>
-        <div id="ETHTickerBox" class="mr-1 col" style="border: black thin solid; color:white; background-color: black;">
+        <div id="ETHTickerBox" class="col tickerbox">
             DOGE-USD</br>
             Price <span id="ETHTicker_Price" class="badge badge-light"></span>
             Ask <span id="ETHTicker_BestAsk" class="badge badge-light"></span>
             Bid <span id="ETHTicker_BestBid" class="badge badge-light"></span>
-            <div class="col" id="ETHChartBox"></div>
+            <div class="col-12" id="ETHChartBox"></div>
         </div>
-        <div id="LTCTickerBox" class="mr-1 col" style="border: black thin solid; color:white; background-color: black;">
+        <div id="LTCTickerBox" class="col tickerbox">
             LTC-USD</br>
             Price <span id="LTCTicker_Price" class="badge badge-light"></span>
             Ask <span id="LTCTicker_BestAsk" class="badge badge-light"></span>
             Bid <span id="LTCTicker_BestBid" class="badge badge-light"></span>
-            <div class="col" id="LTCChartBox"></div>
+            <div class="col-12" id="LTCChartBox"></div>
         </div>
     </div>
 
