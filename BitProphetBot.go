@@ -456,7 +456,7 @@ func (b *BitProphetBot) CheckSellFills() {
 		if resp.Settled {
 			logger.Printf("[CheckSellFills] [Settled Sell] [%s] [%s] [%s] [%s] [SellPrice: %s] [DoneAt: %s]", resp.ID, resp.Status, resp.ProductId, resp.Size, resp.ExecutedValue, resp.DoneAt.String())
 			// update the database to make it stop checkin this one
-			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SoldValue=?,TimeSold=?,FilledSell=?,SellFee=?,LastStatusResp WHERE SellOrderID=?`, resp.Status, resp.ExecutedValue, resp.DoneAt, true, resp.FillFees, fmt.Sprintf("%s", reply), resp.ID)
+			_, err = LocalDB.Exec(`UPDATE Ledger SET Status=?,SoldValue=?,TimeSold=?,FilledSell=?,SellFee=?,LastStatusResp=? WHERE SellOrderID=?`, resp.Status, resp.ExecutedValue, resp.DoneAt, true, resp.FillFees, fmt.Sprintf("%s", reply), resp.ID)
 			if err != nil {
 				logger.Printf("[CheckSellFills] DB Error: %s", err)
 				return
