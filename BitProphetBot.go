@@ -329,7 +329,7 @@ func (b *BitProphetBot) CheckBuyFills() {
 		fills = append(fills, f)
 	}
 	logger.Printf("[CheckBuyFills] Found %d Pending Buy Orders in Ledger", len(fills))
-	for z, f := range fills {
+	for _, f := range fills {
 		// may need to limit this, I think 8 per some_interval is the maximum and there is no batch check (/fills endpoint isnt what I want)
 		req := api.NewSecureRequest("get_order", Config.CBVersion) // create the req
 		req.Credentials.Key = Config.BPInternalAccount.AccessKey   // setup it's creds
@@ -367,6 +367,10 @@ func (b *BitProphetBot) CheckBuyFills() {
 			}
 			sell.Side = "sell"
 			sell.Market = f.Market.String
+			z := 0
+			if sell.Market == "DOGE-USD" {
+				z = 1
+			}
 			sell.Size = fmt.Sprintf(Config.BotDefaults.QuoteIncrements[z], f.CoinAmount.Float64)
 			sell.Price = fmt.Sprintf("%.2f", f.SellPrice.Float64)
 
