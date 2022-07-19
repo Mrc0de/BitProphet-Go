@@ -145,6 +145,7 @@ func (b *BitProphetBot) AutoSuggest() {
 		logger.Printf("[AutoSuggest] Price [%s] [$%.2f]", m, coinAsk)
 		logger.Printf("[AutoSuggest] MinCryptoBuy: (%.2f %s * $%.2f) = MinPriceBuy: $%.2f", Config.BotDefaults.MinCryptoBuy, coin, coinAsk, minPriceBuy)
 		availCash, err := strconv.ParseFloat(NativeAcc.Available, 32)
+		availCash -= 0.01 // trying to prevent edge balance failures
 		if err != nil {
 			logger.Printf("[AutoSuggest] ERROR: %s", err)
 		}
